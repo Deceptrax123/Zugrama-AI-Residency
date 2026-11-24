@@ -1,12 +1,13 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Re-running Is Not Reviewing</title>
-<meta name="description" content="An audited, hypothesis-driven analysis of 25 GPT-6.1 Sol agents and 3 judge agents building software together: verification, feedback, division of work, project directions and the run's own failure points.">
-<meta property="og:title" content="Re-running Is Not Reviewing">
-<meta property="og:description" content="28 LLM agents built software together for 7.6 active hours. Peer re-runs almost never found bugs, specific change requests were acted on while 'needs evidence' fell below the base rate, and building concentrated in a few hands.">
+<link rel="canonical" href="https://deceptrax123.github.io/agent-project-study/">
+<title>Zugrama Residency</title>
+<meta name="description" content="How AI agents found teammates, negotiated responsibilities and tested solutions in a simulated project residency.">
+<meta property="og:title" content="Zugrama Residency">
+<meta property="og:description" content="How AI agents found teammates, negotiated responsibilities and tested solutions in a simulated project residency.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
@@ -17,18 +18,14 @@
 <body>
 <div class="topbar">
   <div class="wrap">
-    <a class="brand" href="#top">Re-running Is Not Reviewing</a>
+    <a class="brand" href="#top">Zugrama Residency</a>
     <nav aria-label="Sections">
       <a href="#abstract">Abstract</a>
-      <a href="#questions">Questions</a>
-      <a href="#methods">Methods</a>
-      <a href="#audit">Run audit</a>
-      <a href="#results">Results</a>
+      <a href="#teams">Team formation</a>
+      <a href="#solutions">Solutions and assignments</a>
       <a href="#labour">Division of work</a>
-      <a href="#directions">Directions</a>
-      <a href="#conversations">Conversations</a>
-      <a href="#tests">All tests</a>
-      <a href="#discussion">Discussion</a>
+      <a href="#results">Testing and review</a>
+      <a href="#methods">Methods</a>
       <a href="#cite">Cite</a>
     </nav>
     <button class="theme-btn" type="button">Dark mode</button>
@@ -36,74 +33,235 @@
 </div>
 
 <main id="top">
-<header class="hero wrap wide">
-  <p class="venue">Agent Residency Studies · Study 2 of 2</p>
-  <h1 class="title">Re-running Is Not Reviewing</h1>
-  <p class="subtitle">An audited analysis of verification, feedback and the division of work among 28 LLM agents building software</p>
+<header class="hero wrap">
+  <p class="venue">Zugrama studies · Study 2</p>
+  <h1 class="title">Zugrama Residency</h1>
+  <p class="subtitle">How agents found teammates, divided work, and turned ideas into tested components</p>
   <p class="authors">Srinitish Srinivasan</p>
   <p class="affil">Agent Network Sandbox · November 2026</p>
   <div class="buttons">
-    <a class="btn" href="https://github.com/Deceptrax123/Agent-network-sandbox-pilot"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>Sandbox code</a>
-    <a class="btn secondary" href="static/data/science.json" download>Test results (JSON)</a>
-    <a class="btn secondary" href="static/data/projects.json" download>Figure data (JSON)</a>
-    <a class="btn secondary" href="https://github.com/Deceptrax123/agent-project-study/tree/main/analysis">Analysis scripts</a>
-    <a class="btn secondary" href="../agent-networking-study/">← Study 1: Networking</a>
+    <a class="btn" href="#solutions">Read the project cases</a>
+    <a class="btn secondary" href="../agent-networking-study/">Zugrama Networking Event</a>
   </div>
 </header>
 
-<div class="wrap wide">
+<div class="wrap reading">
+
+<section id="work-explorer" class="opening-explorer" aria-labelledby="work-explorer-title">
+  <h2 id="work-explorer-title">Who built, and who ran the work?</h2>
+  <p>Most entries with source had one author. Many also had an execution by a different agent.</p>
   <figure>
     <div class="fig">
-      <div class="legend"><span><i style="background:var(--s1);border-radius:50%"></i>Resident</span><span><i style="background:var(--s2);border-radius:50%"></i>Supplied judge</span></div>
-      <div class="chart" id="fig-network"></div>
+      <fieldset class="chart-controls" id="work-unit">
+        <legend>Compare by</legend>
+        <label><input type="radio" name="work-unit" value="count" checked> Entry count</label>
+        <label><input type="radio" name="work-unit" value="share"> Share of each group</label>
+      </fieldset>
+      <div class="legend"><span><i style="background:var(--s1)"></i>Outside run</span><span><i style="background:var(--neutral)"></i>No outside run</span></div>
+      <div class="chart" id="fig-builders"></div>
+      <p class="chart-reading" id="work-reading" aria-live="polite">An outside agent ran 33 of the 49 single-author entries and 6 of the 23 multi-author entries.</p>
     </div>
-    <figcaption><b>Figure 1. Who worked with whom.</b> An edge joins two agents who both wrote messages in the same room. Edge width is the number of messages exchanged, and node size is messages written. Unlike the full mesh in Study 1, residents form clusters: only 82 of the 300 possible resident pairs ever shared a room. The three judges and one self-appointed tester (Gaurav) are the bridges between clusters. Hover over a node to see its ties.</figcaption>
+    <figcaption>The 72 entries shown had a source revision. An outside run came from someone who authored no source on that entry. Judges and all sandboxed outcomes are included.</figcaption>
   </figure>
-</div>
-
-<div class="wrap">
-<section id="tldr">
-  <h2>TL;DR</h2>
-  <ul class="tldr">
-    <li><b>Re-running is not reviewing.</b> Peers ran code 266 times on revisions the builder had already passed, and only 6 runs failed (2.3%). Half of those failures were missing files. New probes failed more often than re-runs (14.2% vs 3.8%, Fisher p = 0.001). But when runs on the same project are treated as related, the confidence interval for the difference includes zero, so we call this suggestive rather than established.</li>
-    <li><b>The wording of a review predicts what happens next.</b> After a "changes requested" review, 82% of projects were revised within 30 minutes. After "needs evidence", only 23% were, which is <i>below</i> the 46% chance of a revision in any random 30-minute window on the same projects.</li>
-    <li><b>Building is concentrated; talking is not.</b> 49 of 72 projects with source were built by one agent. Revisions are more unequally spread than messages (Gini 0.28 vs 0.18, difference CI excludes zero), and peer testing is very concentrated (Gini 0.75). Two residents took on testing roles without being asked.</li>
-    <li><b>The work moves from exploring to improving.</b> In the first half hour every revision went to a new project. By the end almost all went to existing ones (trend z = −8.2). Requests to read source that had not been published yet also declined over the run (z = −7.2).</li>
-    <li><b>The audit changes the numbers.</b> 35% of "messages" in the record are receipts the platform posted under agents' names. Removing them lowers the talk–build correlation from 0.79 to 0.65. One agent's worker died at 3.0 active hours, removing it for 60% of the run. The prompt also told every agent the study's hypothesis.</li>
-  </ul>
 </section>
 
 <section id="abstract">
   <h2>Abstract</h2>
   <div class="abstract">
-    <p>We seed 25 language-model agents (GPT-6.1 Sol, high reasoning) with project goals and skill summaries taken from residency applications. We add three judge agents, each with an explicit remit, and let the population self-organise for 7.6 active hours. No teams or partners are assigned. Agents talk in rooms of any size, publish versioned source to a shared workshop, execute it in a sandbox and request review.</p>
-    <p>We first audit the run against its raw request/response log, usage ledger and tool log. The bookkeeping reconciles exactly, but the audit finds three problems:</p>
-    <ul>
-      <li>35% of chat messages are platform-generated receipts recorded under agent names;</li>
-      <li>one agent's worker died at 3.0 active hours and was never revived;</li>
-      <li>the system prompt disclosed the study's hypothesis to every agent.</li>
-    </ul>
-    <p>On the cleaned record (1,780 agent-written messages, 209 revisions, 577 executions, 81 reviews) we test 12 exploratory hypotheses with exact, resampling and stratified methods, adjusting for multiple comparisons. Four results stand out:</p>
-    <ul>
-      <li>Peer re-runs of passed code almost never fail. The apparent advantage of new probes is not robust once runs on the same project are treated as related.</li>
-      <li>The apparent difference between judges' and residents' checks disappears once check type is held fixed.</li>
-      <li>Concrete change requests are followed by revisions far more often than requests for evidence, which fall below a matched-time baseline.</li>
-      <li>Building is more concentrated than talking. Agents specialise into builders, contributors and testers, and the work shifts from starting projects to improving existing ones.</li>
-    </ul>
-    <p>We add data-selected conversation excerpts and a topic analysis showing that most agent talk is about process (evidence, receipts, handoffs, permissions) rather than about what is being built.</p>
+    <p>How do agents with different project goals find a reason to work together? In Zugrama Residency, 25 GPT-6.1 Sol resident agents entered a shared workshop with goals and skill summaries drawn from residency applications. Three judge agents evaluated the work. The residents chose their own partners and responsibilities over 7.6 active hours.</p>
+    <p>We analysed 1,780 agent-written messages, 209 source revisions, 577 sandboxed executions and 81 reviews. Rooms with three to five active speakers held 62% of messages. Of 72 project entries with source, 23 had multiple authors. Another 33 had one author and an execution by someone outside the author group. Fifteen agents revised a project someone else created, and two residents accounted for 57 of the 93 resident peer executions.</p>
+    <p>In the logs, teams formed around overlapping problems, reciprocal offers and components someone else could use. Agents combined two civic-reporting ideas around one workflow, narrowed a sign-language concept to a reusable text adapter, and negotiated a file-by-file handoff for a memory approval tool. The first two produced tested components. The third reached an explicit agreement with the combined implementation still pending at cutoff. These outcomes distinguish an agreed division of work from a delivered and tested solution.</p>
   </div>
 </section>
 
 <section id="questions">
   <h2>Research questions</h2>
   <ol class="rq">
-    <li><b>Verification.</b><span>Which peer checks surface failures, and does it matter who runs them? (P1–P3)</span></li>
-    <li><b>Feedback.</b><span>Does the form of a judge's review predict whether the builder acts on it? (P4)</span></li>
-    <li><b>Division of work.</b><span>Do agents form teams and specialise? Is building concentrated? Is testing reciprocal? (P5–P8)</span></li>
-    <li><b>Directions.</b><span>How does the work move over time, and what do agents talk about? (P9, P11, topics, families)</span></li>
-    <li><b>Persona vs. setting.</b><span>Does an agent's activity in the networking study predict its activity here? (P10)</span></li>
+    <li><b>Team formation.</b><span>Which shared goals or complementary needs brought agents together?</span></li>
+    <li><b>Solution discovery.</b><span>How did they narrow broad project ideas into components that someone could build or use?</span></li>
+    <li><b>Task assignment.</b><span>Who proposed responsibilities, who accepted them, and which commitments reached a source revision or execution?</span></li>
+    <li><b>Division of work.</b><span>How widely were implementation and testing distributed across agents and projects?</span></li>
   </ol>
-  <p class="caveat">All hypotheses are exploratory. They were formulated after the earlier qualitative audit of this run, tested on the frozen logs and not pre-registered. Every test we ran is reported in <a href="#tests">the final table</a>, including the null results.</p>
+</section>
+
+<section id="teams">
+  <h2>Team formation</h2>
+  <p>Residents brought individual project goals into a workshop that also offered three village tasks: reporting water, waste and maintenance issues, coordinating shared tools or volunteer time, and retrieving local knowledge offline. A concrete overlap gave agents a reason to open a room and ask for a contribution. The civic team, for example, began when Ganesh saw that two proposals covered the same reporting workflow and asked their authors to build one small slice together.</p>
+  <p>Group conversation was common. Of 103 rooms, 37 had three to five agents who wrote messages. Those rooms held 1,101 of 1,780 agent-written messages. The network below shows where agents exchanged ideas and where judges and testers connected work across groups.</p>
+  <figure>
+    <div class="fig">
+      <p class="chart-title">Who wrote in the same rooms?</p>
+      <div class="legend"><span><i style="background:var(--s1);border-radius:50%"></i>Resident</span><span><i style="background:var(--s2);border-radius:50%"></i>Judge</span></div>
+      <div class="chart" id="fig-network"></div>
+    </div>
+    <figcaption>Two agents are linked if both wrote in a room. Edge weights add the room’s message count divided by the number of other speakers. Node size shows messages written. Among 25 residents, 82 of 300 possible pairs wrote in the same room.</figcaption>
+  </figure>
+  <p>The <a href="../agent-networking-study/">Zugrama Networking Event</a> reached 202 of 210 possible pairs and stayed in two-person rooms. Here, agents used larger rooms to coordinate specific deliverables. The studies also differed in scheduling, roles and available tools, so the comparison describes the two settings.</p>
+</section>
+
+<section id="solutions">
+  <h2>How teams found solutions and assigned work</h2>
+  <p>These cases follow an idea from the first offer through the division of work to the last observable result. They were selected to show different ways of working together, including a handoff that was still open when the run ended.</p>
+  <div class="evidence-grid">
+    <article class="case">
+      <h3>Two civic proposals became one reporting workflow</h3>
+      <p>Ganesh invited the others to amend the scope and choose a contribution. Aditya took the reporting lifecycle and replay logic, then asked Mahboob to choose between the kiosk interface and contribution receipts. Mahboob chose receipts. Ganesh took submission and ingest, and Gaurav took independent QA.</p>
+      <details class="case-evidence">
+        <summary>Outcome and sources</summary>
+        <p>The shared core passed independent checks and four simulated civic tasks. The dashboard still had open persistence cases, and village use remained untested.</p>
+        <p class="source-links"><a href="https://zugrama-project-evaluations.smudge0110.chatgpt.site/#experiment=final&amp;view=source&amp;source=message%3Ac2a46c9f8f354a0b8067f9cb8c50d4ab">Invitation</a> · <a href="https://zugrama-project-evaluations.smudge0110.chatgpt.site/#experiment=final&amp;view=source&amp;source=message%3A322787402ede4b81a2d188985f456757">Task proposal</a> · <a href="https://zugrama-project-evaluations.smudge0110.chatgpt.site/#experiment=final&amp;view=projects&amp;project=civic">Project record</a></p>
+      </details>
+    </article>
+    <article class="case">
+      <h3>A reciprocal offer produced a shared record store</h3>
+      <p>Shriyanshi offered to build a local ingestion component in exchange for privacy review. Alipat proposed a split: Shriyanshi would implement ingestion and its tests, while Alipat would handle schema review, independent acceptance cases and a command-line demo. Shriyanshi explicitly accepted.</p>
+      <details class="case-evidence">
+        <summary>Outcome and sources</summary>
+        <p>Both contributed to one package using synthetic records. A collaborator reran 50 tests successfully. The separate workflow described in the README still awaited an independent run.</p>
+        <p class="source-links"><a href="https://zugrama-project-evaluations.smudge0110.chatgpt.site/#experiment=final&amp;view=source&amp;source=message%3A15e3db0670af4c508ec1f2a4233bb0c4">Task proposal</a> · <a href="https://zugrama-project-evaluations.smudge0110.chatgpt.site/#experiment=final&amp;view=source&amp;source=message%3A30d0500c728d457ca29d3f35448d0f36">Acceptance</a> · <a href="https://zugrama-project-evaluations.smudge0110.chatgpt.site/#experiment=final&amp;view=source&amp;source=run%3Aad37e06b817a421fa11b6c77ea8bf148">Execution record</a></p>
+      </details>
+    </article>
+    <article class="case">
+      <h3>A smaller text adapter made reuse possible</h3>
+      <p>Tuhin lacked validated sign-language assets and proposed a narrower contribution to Anuj’s memory project: an adapter that preserves Hindi and English source text and flags unsupported input. Tuhin built and tested the adapter. Anuj agreed to integrate it, requested permission to copy the exact version and ran tests in the destination.</p>
+      <details class="case-evidence">
+        <summary>Outcome and sources</summary>
+        <p>The original adapter passed 12 tests, and the attributed integration passed 16. The result covers text intake and local memory integration. Sign recognition and speech inference remained outside the tested scope.</p>
+        <p class="source-links"><a href="https://zugrama-project-evaluations.smudge0110.chatgpt.site/#experiment=final&amp;view=source&amp;source=message%3A71b96c8e0f904a71bf205f02c107de10">Adapter proposal</a> · <a href="https://zugrama-project-evaluations.smudge0110.chatgpt.site/#experiment=final&amp;view=source&amp;source=message%3A0fc9c6f71c6d40a089b80828752ee299">Handoff permission</a> · <a href="https://zugrama-project-evaluations.smudge0110.chatgpt.site/#experiment=final&amp;view=source&amp;source=run%3Ac98b8052ed654d3fb5474f19319ff1d8">Destination execution</a></p>
+      </details>
+    </article>
+    <article class="case">
+      <h3>A precise reassignment came too late for integration</h3>
+      <p>Anuj supplied a local memory component and Hiro supplied an approval gate. Aditya reviewed the memory contract, and Gaurav reviewed the acceptance tests. The remaining task was to connect the two components so that a user could preview and approve selected history.</p>
+      <details class="case-evidence">
+        <summary>Outcome and sources</summary>
+        <p>With about a minute left in the record, Hiro asked Anuj to take the integration factory and packaging. Anuj accepted, and Hiro kept the workbench and CLI. The run ended before a combined source revision or execution appeared.</p>
+        <p class="source-links"><a href="https://zugrama-project-evaluations.smudge0110.chatgpt.site/#experiment=final&amp;view=source&amp;source=message%3A82b0cba6993740e4b80b86dea90a4cce">Reassignment</a> · <a href="https://zugrama-project-evaluations.smudge0110.chatgpt.site/#experiment=final&amp;view=source&amp;source=message%3Aa29413f4798c42ff8f8bbe7c5bfcece6">Acceptance</a> · <a href="https://zugrama-project-evaluations.smudge0110.chatgpt.site/#experiment=final&amp;view=projects&amp;project=export">Project record</a></p>
+      </details>
+    </article>
+  </div>
+</section>
+
+<section id="labour">
+  <h2>Division of work</h2>
+  <article class="finding" id="rq3">
+    <p>Forty-nine of the 72 project entries with source had one author. On 33 of those 49, another agent ran the code. Across the full set, 15 agents contributed 35 revisions to entries they had not created. The workshop also recorded 24 explicit source handoffs across 20 entries, each announcing a specific revision to a room.</p>
+    <p>Testing was especially concentrated. Gaurav and Megabyte ran 57 of the 93 resident peer checks, while the three judges ran another 251 peer checks. Resident peer testing had a Gini coefficient of 0.75, compared with 0.28 for source revisions and 0.18 for messages. The activity profiles below show how building, contributing and testing clustered across residents.</p>
+    <div class="stat-line" id="sl-p6"></div>
+    <figure>
+      <div class="fig">
+        <p class="chart-title">Each agent's activity mix</p>
+        <p class="chart-sub">share of the agent's own actions in each role · grouped by archetype</p>
+        <div class="chart" id="fig-roles"></div>
+      </div>
+      <figcaption><b>Emergent roles.</b> "Build own" = revisions to projects the agent created. "Build others'" = revisions to someone else's project. "Test own/others'" = executions. "Talk" = agent-written messages. "Review" = judge reviews. Rows are grouped by archetype. Hover a cell for counts.</figcaption>
+    </figure>
+    <figure>
+      <div class="fig">
+        <div><p class="chart-title">How concentrated is each kind of work?</p><p class="chart-sub">Lorenz curves over the 25 residents</p><div class="legend"><span><i class="line" style="background:var(--s1)"></i>Messages</span><span><i class="line" style="background:var(--s3)"></i>Revisions</span><span><i class="line" style="background:var(--s2)"></i>Peer test runs</span></div><div class="chart" id="fig-lorenz"></div></div>
+      </div>
+      <figcaption>Cumulative shares of work across the 25 residents. Testing for other projects was the activity most concentrated in a few agents.</figcaption>
+    </figure>
+    <figure>
+      <div class="fig fig-row">
+        <div><p class="chart-title">Share of agent-written messages by room size</p><div class="legend"><span><i style="background:var(--s1)"></i>Projects</span><span><i style="background:var(--s2)"></i>Networking (Study 1)</span></div><div class="chart" id="fig-roomsize"></div></div>
+        <div><p class="chart-title">Messages vs revisions (residents)</p><p class="chart-sub">dot size = peer test runs</p><div class="chart" id="fig-talkbuild"></div></div>
+      </div>
+      <figcaption>Left, the share of messages by number of speakers per room in each study. Right, among residents, message and revision counts are positively associated (Spearman ρ = 0.65, 95% CI 0.29–0.86).</figcaption>
+    </figure>
+  </article>
+</section>
+
+<section id="directions">
+  <h2>How the work changed over time</h2>
+  <article class="finding" id="rq4">
+    <p><b>From new entries to revisions.</b> Agents created 47 of 87 entries in the first active hour. Every first-half-hour revision went to an entry less than 30 minutes old. By hour five, almost every revision went to an older entry (Cochran–Armitage z = −8.2).</p>
+    <p><b>Fewer premature reads.</b> Requests reached unpublished work less often as the run progressed. 793 of 14,582 project reads were refused because the source had not been published yet. The refusal share fell from 6–8% in the first four hours to 3–5% afterwards (z = −7.2).</p>
+    <div class="stat-line" id="sl-p11"></div>
+    <figure>
+      <div class="fig fig-row">
+        <div><p class="chart-title">Revisions per half hour</p><div class="legend"><span><i style="background:var(--s4)"></i>to projects &lt; 30 min old</span><span><i style="background:var(--s1)"></i>to older projects</span></div><div class="chart" id="fig-explore"></div></div>
+        <div><p class="chart-title">Reads refused: source not published yet</p><p class="chart-sub">share of project reads, per active hour</p><div class="chart" id="fig-premature"></div></div>
+      </div>
+      <figcaption><b>Direction of effort over active time.</b></figcaption>
+    </figure>
+    <p><b>Coordination dominated the chat.</b> The message topic model surfaced recurring language about interfaces, permissions, handoffs, receipts and review. The cases above show what that language did in particular projects: agents set file boundaries, requested a version they could execute, and agreed on which evidence would close the task.</p>
+    <figure>
+      <div class="fig">
+        <p class="chart-title">Share of messages per topic, per active hour</p>
+        <div class="chart" id="fig-topics"></div>
+      </div>
+      <figcaption><b>What agents talked about.</b> TF-IDF + NMF with k = 8 and seed 1. Labels are assigned by keyword rules from each component's top terms, which are shown under each title.</figcaption>
+    </figure>
+    <figure>
+      <div class="fig">
+        <p class="chart-title">Where the 29 project families ended (earlier audit's classification)</p>
+        <div class="chart" id="fig-outcomes"></div>
+      </div>
+      <figcaption><b>Outcomes.</b> From the earlier audit's retrospective review. A "working component" is a tested, bounded piece, not a completed original project.</figcaption>
+    </figure>
+    <p>For the 15 residents observed in both studies, the association between message counts was imprecise (Spearman ρ = −0.46, 95% CI −0.84 to 0.16). The two settings offered different tasks and opportunities to contribute.</p>
+    <figure>
+      <div class="fig"><p class="chart-title">Messages: networking (Study 1, Run 3) vs projects</p><div class="chart" id="fig-cross"></div></div>
+      <figcaption><b>Same personas, different settings</b> (n = 15 residents; judges excluded because their role changed).</figcaption>
+    </figure>
+  </article>
+</section>
+
+<section id="results">
+  <h2>Testing, feedback and revision</h2>
+
+  <article class="finding" id="rq1">
+    <div class="f-label">Peer testing</div>
+    <p class="claim">Changing the check surfaced more failures in the raw counts. The difference was uncertain across projects.</p>
+    <p>We labelled each of the 577 executions by who ran it and what it ran. Builders’ own runs failed 18.9% of the time. Peer replications fail 3.8% of the time and peer new probes 14.2%. Fisher's test on these counts is significant (OR 4.2). But runs are not independent: the same project is checked many times. When we resample whole projects, the 95% interval for the difference runs from −1.8 to +17.2 points. Of 266 peer runs on a revision the builder had already passed, 6 failed. Three of those failures were missing files.</p>
+    <div class="stat-line" id="sl-p1"></div>
+    <figure>
+      <div class="fig">
+        <p class="chart-title">Share of executions that failed, with 95% Wilson intervals</p>
+        <div class="chart" id="fig-verify"></div>
+      </div>
+      <figcaption><b>Where failures surface.</b> "Peer" means any agent other than the project's creator, judges included. Hover for counts and how many failures were missing files.</figcaption>
+    </figure>
+    <p>Do residents check better than judges? Resident peer runs failed 11.8% of the time against 5.2% for judges (crude OR 2.5, p = 0.053). But residents wrote new probes for 54% of their checks and judges for 22%. After stratifying by check type, the pooled odds ratio was 1.6 (95% CI 0.70–3.65).</p>
+    <div class="stat-line" id="sl-p3"></div>
+    <figure>
+      <div class="fig">
+        <p class="chart-title">Failure rate by runner role and check type</p>
+        <div class="chart" id="fig-verify-role"></div>
+      </div>
+      <figcaption><b>Failures by runner role and check type.</b> Judges ran 251 of the 344 peer executions, mostly replications.</figcaption>
+    </figure>
+  </article>
+
+  <article class="finding" id="rq2">
+    <div class="f-label">Judge feedback</div>
+    <p class="claim">A revision was more likely to follow a “changes requested” review than a “needs evidence” review.</p>
+    <p>The judges published 81 reviews of 29 projects and accepted none: 62 said "needs evidence", 17 said "changes requested" and 2 said "demo ready". A revision followed 14 of 17 “changes requested” reviews (82%) and 14 of 62 “needs evidence” reviews (23%) within 30 active minutes. That raw gap could just reflect projects that were about to be revised anyway, so we drew 40 random moments in each reviewed project's active life and asked the same question. The baseline is 46%. Change requests sit well above it. “Needs evidence” sits below it. Judges chose the review wording, and we did not measure how builders spent the intervening time.</p>
+    <div class="stat-line" id="sl-p4"></div>
+    <figure>
+      <div class="fig fig-row">
+        <div><p class="chart-title">Revised within 30 minutes of …</p><p class="chart-sub">share with 95% Wilson interval</p><div class="chart" id="fig-follow"></div></div>
+        <div><p class="chart-title">Time to the next revision</p><p class="chart-sub">cumulative share of reviews, active minutes</p><div class="legend"><span><i class="line" style="background:var(--s2)"></i>Changes requested</span><span><i class="line" style="background:var(--s1)"></i>Needs evidence</span></div><div class="chart" id="fig-curves"></div></div>
+      </div>
+      <figcaption><b>Review wording and follow-through.</b> Left, the dashed line marks the matched random-time baseline. Right, the share of reviews that had been followed by a revision, as time passes. Curves end at the share of reviews ever followed by a revision.</figcaption>
+    </figure>
+    <figure>
+      <div class="fig">
+        <p class="chart-title">Review decisions by judge</p>
+        <div class="legend"><span><i style="background:var(--s1)"></i>Needs evidence</span><span><i style="background:var(--s2)"></i>Changes requested</span><span><i style="background:var(--s3)"></i>Demo ready</span></div>
+        <div class="chart" id="fig-judges"></div>
+      </div>
+      <figcaption>All three judges defaulted to "needs evidence", whatever their remit.</figcaption>
+    </figure>
+  </article>
+</section>
+
+<section id="discussion">
+  <h2>Discussion</h2>
+  <p>Teams formed around a specific need. The civic team reduced duplicate work by agreeing on one common workflow. The record-store pair traded implementation for review. The text adapter worked across projects because the supplier defined a usable boundary and the recipient tested it after copying.</p>
+  <p>Much of the division of work was between authors and reviewers. A project could have one source author and still receive useful outside testing. Conversely, the memory approval team named owners for all remaining files and supplied acceptance tests, yet never recorded an execution of the combined version. An assessment of collaboration therefore needs the assignment, the artifact it produced, and the scope of the test.</p>
+  <p>Together with the <a href="../agent-networking-study/">Zugrama Networking Event</a>, these records show how the same model could use conversation for different purposes. Networking made it possible to find partners and develop ideas across topics. The workshop made more of the work visible through specific responsibilities, versioned handoffs and execution records.</p>
 </section>
 
 <section id="methods">
@@ -111,7 +269,7 @@
   <div class="setup-grid">
     <div class="case"><span class="pill">Population</span><h4>25 residents + 3 judges</h4><p>Residents were seeded with stated goals, sourced skill summaries and proposed acceptance checks. The judges had fixed remits: <b>Lou</b> (village usefulness), <b>Danish</b> (technical correctness and privacy) and <b>Guru</b> (delivery and scope). All agents ran GPT-6.1 Sol with high reasoning.</p></div>
     <div class="case"><span class="pill">Workshop</span><h4>Versioned code + sandbox</h4><p>Agents could create, write, run, hand off and share projects. Runs execute in a network-isolated sandbox and return receipts bound to source hashes. A round-robin scheduler gave each agent about 275 model calls.</p></div>
-    <div class="case"><span class="pill">Clock</span><h4>7.6 active hours</h4><p>One operator pause of 7.2 h is removed from every time axis. "Hours" on this page means active hours.</p></div>
+    <div class="case"><span class="pill">Clock</span><h4>7.6 active hours</h4><p>All elapsed times use the active clock.</p></div>
   </div>
   <div class="stats" id="run-stats"></div>
   <dl class="methods">
@@ -120,6 +278,9 @@
     <dt>Measures</dt>
     <dd>
       <ul>
+        <li><i>Room size</i> counts distinct speakers with an agent-written message. <i>Co-authorship</i> counts distinct authors of committed source revisions on the same entry.</li>
+        <li><i>Outside execution</i> is a sandboxed run by an agent outside the set of everyone who authored source for that entry by cutoff. This is a stricter measure than the non-creator runs used in the verification tests.</li>
+        <li><i>Source handoff</i> counts successful explicit handoff calls for a specific revision. Task agreements and cross-entry reuse are traced from messages and artifacts in selected cases.</li>
         <li><i>Self run</i>: an execution by the project's creator.</li>
         <li><i>Peer replication</i>: a non-creator runs a command string already run on that project.</li>
         <li><i>Peer new probe</i>: a non-creator runs a command never run on that project before.</li>
@@ -144,23 +305,29 @@
     <dt>Reproducibility</dt>
     <dd><code>analysis/build_data.py</code> builds the descriptive figures and <code>analysis/science.py</code> builds the audit, tests, division of work, topics and conversation selection. Both read the frozen sources only. Seeds are fixed, and no resident code is executed.</dd>
   </dl>
+  <div class="buttons" aria-label="Data and code">
+    <a class="btn secondary" href="https://github.com/Deceptrax123/Agent-network-sandbox-pilot"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>Sandbox code</a>
+    <a class="btn secondary" href="static/data/science.json" download>Analysis results (JSON)</a>
+    <a class="btn secondary" href="static/data/projects.json" download>Figure data (JSON)</a>
+    <a class="btn secondary" href="https://github.com/Deceptrax123/agent-project-study/tree/main/analysis">Analysis scripts</a>
+  </div>
 </section>
 
 <section id="audit">
   <h2>Run audit</h2>
-  <p>We checked whether the run happened as designed by comparing four sources: the scheduler (when each agent was called), the raw model requests and responses, the usage ledger and the platform's records of messages, tools and projects. The operator pause is ignored by design; the run was resumed on the same clock.</p>
+  <p>We checked whether the run happened as designed by comparing four sources: the scheduler (when each agent was called), the raw model requests and responses, the usage ledger and the platform's records of messages, tools and projects.</p>
   <figure>
     <div class="fig">
       <p class="chart-title">Model calls per agent over active time</p>
       <div class="legend"><span><i style="background:var(--s1)"></i>model call</span><span><i style="background:var(--s2)"></i>not scheduled (&gt; 20 active min)</span></div>
       <div class="chart" id="fig-lanes"></div>
     </div>
-    <figcaption><b>Figure 2. The run as the scheduler saw it.</b> Round-robin scheduling gave 27 agents 271–282 calls each. Abhinav's worker stopped at 3.0 active hours and made one more call after the pause, so the agent was absent for 4.6 of 7.6 hours. Hover over a row for details.</figcaption>
+    <figcaption><b>The run as the scheduler saw it.</b> Round-robin scheduling gave 27 agents 271–282 calls each. Abhinav's worker stopped at 3.0 active hours and was absent for 4.6 of 7.6 hours. Hover over a row for details.</figcaption>
   </figure>
   <div class="audit-grid" id="audit-items"></div>
   <figure>
     <div class="fig"><div class="table-wrap"><table class="compare" id="tbl-audit"></table></div></div>
-    <figcaption><b>Table 1. Integrity checks.</b> Token counts in the raw responses match the ledger exactly. Every call without a recorded cost is a provider error.</figcaption>
+    <figcaption><b>Integrity checks.</b> Token counts in the raw responses match the ledger exactly. Every call without a recorded cost is a provider error.</figcaption>
   </figure>
   <div class="prior"><span class="tag">Corrects earlier numbers</span>Our first draft and the earlier automated audit counted all 2,731 chat messages as agent talk. Excluding the 951 platform receipts changes several results:</div>
   <ul>
@@ -173,164 +340,6 @@
   <p class="caveat"><b>Demand characteristics.</b> Every system prompt began: <i id="aim"></i> It also told agents to "distinguish a proposed approach, a draft artifact, a tested artifact and externally validated completion" and to "preserve failures". The evidence-heavy vocabulary we observe (receipts, scopes, "not human adoption evidence") is at least partly an instruction-following effect.</p>
 </section>
 
-<section id="results">
-  <h2>Results</h2>
-
-  <article class="finding" id="rq1">
-    <div class="f-label">RQ1 · Verification</div>
-    <p class="claim">Peer re-runs of code that already passes almost never fail. New probes look better, but the evidence for that is not robust.</p>
-    <p>We labelled each of the 577 executions by who ran it and what it ran. Builders' own runs fail 18.9% of the time, because they are still developing. Peer replications fail 3.8% of the time and peer new probes 14.2%. Fisher's test on these counts is significant (OR 4.2). But runs are not independent: the same project is checked many times. When we resample whole projects, the 95% interval for the difference runs from −1.8 to +17.2 points. The cleanest estimate is the descriptive one: only 6 of 266 peer runs on a revision the builder had already passed failed, and 3 of those 6 were missing files.</p>
-    <div class="stat-line" id="sl-p1"></div>
-    <figure>
-      <div class="fig">
-        <p class="chart-title">Share of executions that failed, with 95% Wilson intervals</p>
-        <div class="chart" id="fig-verify"></div>
-      </div>
-      <figcaption><b>Figure 3. Where failures surface.</b> "Peer" means any agent other than the project's creator, judges included. Hover for counts and how many failures were missing files.</figcaption>
-    </figure>
-    <p>Do residents check better than judges? Resident peer runs failed 11.8% of the time against 5.2% for judges (crude OR 2.5, p = 0.053). But residents wrote new probes for 54% of their checks and judges for 22%. Holding check type fixed, the pooled odds ratio falls to 1.6 (95% CI 0.70–3.65). The role difference is explained by <i>what</i> was run, not <i>who</i> ran it.</p>
-    <div class="stat-line" id="sl-p3"></div>
-    <figure>
-      <div class="fig">
-        <p class="chart-title">Failure rate by runner role and check type</p>
-        <div class="chart" id="fig-verify-role"></div>
-      </div>
-      <figcaption><b>Figure 4. Stratifying by check type removes the role effect.</b> Judges ran 251 of the 344 peer executions, mostly replications.</figcaption>
-    </figure>
-  </article>
-
-  <article class="finding" id="rq2">
-    <div class="f-label">RQ2 · Feedback</div>
-    <p class="claim">Builders act on change requests they can carry out. "Needs evidence" is followed by less revision than a random moment.</p>
-    <p>The judges published 81 reviews of 29 projects and accepted none: 62 said "needs evidence", 17 said "changes requested" and 2 said "demo ready". After "changes requested", 82% of projects were revised within 30 active minutes. After "needs evidence", 23% were. That raw gap could just reflect projects that were about to be revised anyway, so we drew 40 random moments in each reviewed project's active life and asked the same question. The baseline is 46%. Change requests sit well above it. "Needs evidence" sits below it: the builder, it seems, is more often off gathering what was asked for than revising code.</p>
-    <div class="stat-line" id="sl-p4"></div>
-    <figure>
-      <div class="fig fig-row">
-        <div><p class="chart-title">Revised within 30 minutes of …</p><p class="chart-sub">share with 95% Wilson interval</p><div class="chart" id="fig-follow"></div></div>
-        <div><p class="chart-title">Time to the next revision</p><p class="chart-sub">cumulative share of reviews, active minutes</p><div class="legend"><span><i class="line" style="background:var(--s2)"></i>Changes requested</span><span><i class="line" style="background:var(--s1)"></i>Needs evidence</span></div><div class="chart" id="fig-curves"></div></div>
-      </div>
-      <figcaption><b>Figure 5. Review wording and follow-through.</b> <i>Left</i>: the dashed line marks the matched random-time baseline. <i>Right</i>: the share of reviews that had been followed by a revision, as time passes. Curves end at the share of reviews ever followed by a revision.</figcaption>
-    </figure>
-    <figure>
-      <div class="fig">
-        <p class="chart-title">Review decisions by judge</p>
-        <div class="legend"><span><i style="background:var(--s1)"></i>Needs evidence</span><span><i style="background:var(--s2)"></i>Changes requested</span><span><i style="background:var(--s3)"></i>Demo ready</span></div>
-        <div class="chart" id="fig-judges"></div>
-      </div>
-      <figcaption><b>Figure 6.</b> All three judges defaulted to "needs evidence", whatever their remit.</figcaption>
-    </figure>
-  </article>
-</section>
-
-<section id="labour">
-  <h2>Division of work</h2>
-  <article class="finding" id="rq3">
-    <div class="f-label">RQ3 · Teams, specialisation and concentration</div>
-    <p class="claim">Agents formed teams, but building stayed in few hands. A handful of agents became testers without being asked.</p>
-    <p>The same model that kept strictly to one-to-one chats while networking formed rooms of 3–5 here: 37 of 103 rooms, holding 62% of agent-written messages. Within those teams, though, the work was not shared evenly:</p>
-    <ul>
-      <li><b>Mostly solo projects.</b> 49 of the 72 projects that received source (68%) were built by one agent, and only 23 had more than one author.</li>
-      <li><b>Building is concentrated.</b> Revisions are more unequally spread than messages (Gini 0.28 vs 0.18; the bootstrap interval for the difference excludes zero).</li>
-      <li><b>Testing is more concentrated still.</b> Peer test runs by residents have a Gini of 0.75. Gaurav and Megabyte alone ran 57 of the 93 resident peer checks.</li>
-    </ul>
-    <p>Classifying each agent by the role it did more of than the average resident gives 12 builders, 8 contributors (who revised others' projects), 2 testers and 3 talkers, plus the 3 judges.</p>
-    <p>Do agents return the favour of testing? Among resident tester → owner links, 6% are reciprocated, against 2% expected by chance with the same in- and out-degrees (p = 0.28). That is no evidence of reciprocal testing. Agents who talk more also build more (ρ = 0.65). Every agent had the same budget of calls, so this is a trade-off within that budget: the quietest agents spent their calls reading.</p>
-    <div class="stat-line" id="sl-p6"></div>
-    <figure>
-      <div class="fig">
-        <p class="chart-title">Each agent's activity mix</p>
-        <p class="chart-sub">share of the agent's own actions in each role · grouped by archetype</p>
-        <div class="chart" id="fig-roles"></div>
-      </div>
-      <figcaption><b>Figure 7. Emergent roles.</b> "Build own" = revisions to projects the agent created. "Build others'" = revisions to someone else's project. "Test own/others'" = executions. "Talk" = agent-written messages. "Review" = judge reviews. Rows are grouped by archetype. Hover a cell for counts.</figcaption>
-    </figure>
-    <figure>
-      <div class="fig fig-row">
-        <div><p class="chart-title">How concentrated is each kind of work?</p><p class="chart-sub">Lorenz curves over the 25 residents</p><div class="legend"><span><i class="line" style="background:var(--s1)"></i>Messages</span><span><i class="line" style="background:var(--s3)"></i>Revisions</span><span><i class="line" style="background:var(--s2)"></i>Peer test runs</span></div><div class="chart" id="fig-lorenz"></div></div>
-        <div><p class="chart-title">Distinct authors per project</p><p class="chart-sub">72 projects with source</p><div class="chart" id="fig-builders"></div></div>
-      </div>
-      <figcaption><b>Figure 8. Concentration.</b> <i>Left</i>: the further a curve sags below the diagonal, the more the work is concentrated in a few agents. <i>Right</i>: most projects had a single author.</figcaption>
-    </figure>
-    <figure>
-      <div class="fig fig-row">
-        <div><p class="chart-title">Share of agent-written messages by room size</p><div class="legend"><span><i style="background:var(--s1)"></i>Projects</span><span><i style="background:var(--s2)"></i>Networking (Study 1)</span></div><div class="chart" id="fig-roomsize"></div></div>
-        <div><p class="chart-title">Messages vs revisions (residents)</p><p class="chart-sub">dot size = peer test runs</p><div class="chart" id="fig-talkbuild"></div></div>
-      </div>
-      <figcaption><b>Figure 9.</b> <i>Left</i>: the task produced teams where networking produced none. <i>Right</i>: talk and build go together (ρ = 0.65, 95% CI 0.29–0.86).</figcaption>
-    </figure>
-  </article>
-</section>
-
-<section id="directions">
-  <h2>Directions: where the work went</h2>
-  <article class="finding" id="rq4">
-    <div class="f-label">RQ4 · From exploring to improving</div>
-    <p class="claim">Agents started many projects early, then shifted to improving a few. Talk was mostly about process, not product.</p>
-    <p><b>Explore, then exploit.</b> 47 of 87 projects were created in the first active hour. In the first half hour every revision went to a project less than 30 minutes old. By hour 5, almost every revision went to an established one (Cochran–Armitage z = −8.2). The shift is gradual and continues through the run, not a single switch.</p>
-    <p><b>Fewer premature reads.</b> Agents learned to stop requesting unpublished work. 793 of 14,582 project reads were refused because the source had not been published yet. The refusal share fell from 6–8% in the first four hours to 3–5% afterwards (z = −7.2).</p>
-    <div class="stat-line" id="sl-p11"></div>
-    <figure>
-      <div class="fig fig-row">
-        <div><p class="chart-title">Revisions per half hour</p><div class="legend"><span><i style="background:var(--s4)"></i>to projects &lt; 30 min old</span><span><i style="background:var(--s1)"></i>to older projects</span></div><div class="chart" id="fig-explore"></div></div>
-        <div><p class="chart-title">Reads refused: source not published yet</p><p class="chart-sub">share of project reads, per active hour</p><div class="chart" id="fig-premature"></div></div>
-      </div>
-      <figcaption><b>Figure 10. Direction of effort over active time.</b></figcaption>
-    </figure>
-    <p><b>Talk is mostly about process.</b> A topic model of the 1,780 agent-written messages finds eight themes. All but one concern process rather than domain: human evidence and instructions, independent passes and receipts, failures and packaging, attribution and permission to copy, source handoffs, judge scope and authorising releases. Even the exception, integration and interfaces, is about how components fit together, not what they do. The village problems the agents were building for (water reporting, tool sharing, offline knowledge) barely surface as vocabulary. This fits the disclosed aim and the evidence-focused prompt noted in the audit.</p>
-    <figure>
-      <div class="fig">
-        <p class="chart-title">Share of messages per topic, per active hour</p>
-        <div class="chart" id="fig-topics"></div>
-      </div>
-      <figcaption><b>Figure 11. What agents talked about.</b> TF-IDF + NMF with k = 8 and seed 1. Labels are assigned by keyword rules from each component's top terms, which are shown under each title.</figcaption>
-    </figure>
-    <figure>
-      <div class="fig">
-        <p class="chart-title">Where the 29 project families ended (earlier audit's classification)</p>
-        <div class="chart" id="fig-outcomes"></div>
-      </div>
-      <figcaption><b>Figure 12. Outcomes.</b> From the earlier audit's retrospective review. A "working component" is a tested, bounded piece, not a completed original project.</figcaption>
-    </figure>
-    <p><b>Persona vs. setting.</b> For the 15 residents who appear in both studies, messages written while networking and while building are not positively related (ρ = −0.46, 95% CI −0.84 to 0.16, p = 0.09). How much an agent participates seems to depend on the task, not the persona.</p>
-    <figure>
-      <div class="fig"><p class="chart-title">Messages: networking (Study 1, Run 3) vs projects</p><div class="chart" id="fig-cross"></div></div>
-      <figcaption><b>Figure 13. Same personas, different settings</b> (n = 15 residents; judges excluded because their role changed).</figcaption>
-    </figure>
-  </article>
-</section>
-
-<section id="conversations">
-  <h2>Interesting conversations</h2>
-  <p>We chose these conversations by rule, so they can be reproduced, and each card states its rule. Quoted turns are the first 60 words of the original message, with "…" where we cut. They complement the earlier audit's ten hand-picked highlights. Agents are simulated personas, and their words are not the views of the people they represent.</p>
-  <div class="convos" id="convos"></div>
-</section>
-
-<section id="tests">
-  <h2>All hypothesis tests</h2>
-  <p>Every test we ran is listed below, including the null results. "Supported" means the BH-adjusted p is below 0.05 and the effect goes in the stated direction. "Estimate" rows report an interval without a null hypothesis.</p>
-  <div id="tbl-tests"></div>
-</section>
-
-<section id="discussion">
-  <h2>Discussion</h2>
-  <p><b>Measure checks by what they could have found.</b> A dashboard that counts "independently verified" runs would credit 238 replications that tested nothing new. Re-runs confirm reproducibility, not correctness. Where peers did find failures, they mostly found packaging defects and missing files, the seams between agents, rather than logic errors.</p>
-  <p><b>Evaluator agents should ask for things that can be done.</b> A request the builder can carry out is acted on. A standard the builder has to interpret is followed by less revision than a random moment. This is observational, since judges chose their wording per project, but it suggests a direct experiment, listed below.</p>
-  <p><b>Self-organisation produced specialists, not collectives.</b> Agents formed teams to talk, but most projects kept a single author. Testing became a job for two volunteers and three judges rather than a shared norm, and testing was not reciprocated.</p>
-  <p><b>Audit before you analyse.</b> Platform receipts in the chat stream, a silently dead worker and a prompt that disclosed the hypothesis each changed or qualified a headline number. None of them was visible in the summary statistics.</p>
-  <div class="prior"><span class="tag">Relation to the earlier audit</span>The earlier automated audit (GPT-6.1 Sol and GPT-6.2 Astra) traced curated cases of role negotiation, counterexample-driven repair and broken handoffs. Those cases remain accurate. This study adds three things: prevalence estimates with intervals, tests that remove two apparent effects (role, and to a degree probe type), and corrected message-level statistics.</div>
-  <div class="table-wrap"><table class="compare">
-    <thead><tr><th>Earlier finding</th><th>Status</th><th>What the audited log adds</th></tr></thead>
-    <tbody>
-      <tr><td>Groups formed through specific requests and negotiated roles</td><td>Confirmed</td><td>37 rooms of 3–5 agents hold 62% of agent-written messages (Fig. 9).</td></tr>
-      <tr><td>Division of work became concrete at interfaces</td><td>Refined</td><td>68% of projects still had one author. Testing concentrated in two volunteers and the judges (Fig. 7–8).</td></tr>
-      <tr><td>Concrete counterexamples changed code</td><td>Refined</td><td>Real but rare. Probes look better than re-runs, but the interval includes zero once runs on the same project are treated as related (Fig. 3).</td></tr>
-      <tr><td>Passing components did not guarantee handoff</td><td>Confirmed</td><td>Half the failures after a builder's pass were missing files, and 793 reads were refused for unpublished source.</td></tr>
-      <tr><td>Completion depended on agreed scope and evidence</td><td>Confirmed</td><td>No acceptances. "Needs evidence" is followed by less revision than chance (Fig. 5).</td></tr>
-      <tr><td>No multi-agent performance advantage established</td><td>Agreed</td><td>There is still no single-agent or assigned-team control.</td></tr>
-    </tbody>
-  </table></div>
-</section>
-
 <section id="limits">
   <h2>Limitations</h2>
   <ul>
@@ -339,6 +348,7 @@
     <li><b>Observational feedback analysis.</b> Judges chose their wording per project, and the matched-time null controls for project lifetimes, not for project state.</li>
     <li><b>The hypothesis was disclosed.</b> Agents knew the study was about completing projects through collaboration.</li>
     <li><b>Keyword and topic measures are approximate.</b> Labels are assigned by published rules.</li>
+    <li><b>Selected cases.</b> The project paths illustrate how work was negotiated. They do not estimate how often assignments were accepted, and code authorship misses work done in separate entries or in chat.</li>
     <li><b>Personas are not people.</b> Nothing here evaluates the real applicants or their proposals.</li>
   </ul>
 </section>
@@ -352,6 +362,18 @@
     <li><b>Assign roles, or don't.</b> Compare self-organised specialisation with assigned builder/tester pairs at equal token budget.</li>
     <li><b>Collaboration vs. solo work.</b> Match budgets across single-agent, assigned-team and self-organised conditions on the same project goals.</li>
   </ul>
+</section>
+
+<section id="tests">
+  <h2>All hypothesis tests</h2>
+  <p>These tests were chosen after an initial qualitative review of the run. The table includes all exploratory tests, including null results. “Supported” marks results in the stated direction with a Benjamini–Hochberg-adjusted p-value below 0.05.</p>
+  <div id="tbl-tests"></div>
+</section>
+
+<section id="conversations">
+  <h2>Appendix: conversation excerpts</h2>
+  <p>We chose these conversations by rule, so they can be reproduced, and each card states its rule. Quoted turns are the first 60 words of the original message, with "…" where we cut. They complement the earlier audit's ten hand-picked highlights. Agents are simulated personas, and their words are not the views of the people they represent.</p>
+  <div class="convos" id="convos"></div>
 </section>
 
 <section id="agents">
@@ -376,12 +398,11 @@
 
 <section id="cite">
   <h2>BibTeX</h2>
-<pre class="bibtex"><button class="theme-btn copy-btn" type="button">Copy</button><code>@misc{srinivasan2026rerunning,
-  title  = {Re-running Is Not Reviewing: An Audited Analysis of Verification, Feedback
-            and the Division of Work among LLM Agents Building Software},
+<pre class="bibtex"><button class="theme-btn copy-btn" type="button">Copy</button><code>@misc{srinivasan2026zugramaresidency,
+  title  = {Zugrama Residency},
   author = {Srinivasan, Srinitish},
   year   = {2026},
-  note   = {Agent Residency Studies, Study 2},
+  note   = {Zugrama studies, Study 2},
   url    = {https://deceptrax123.github.io/agent-project-study/}
 }</code></pre>
 </section>
@@ -391,7 +412,7 @@
 <footer>
   <div class="wrap">
     <p><b>Data and privacy.</b> All figures and tests are computed from the frozen project snapshot, the run database (read-only), the raw request/response audit and the earlier audit's family classifications, using <code>analysis/build_data.py</code> and <code>analysis/science.py</code>. No resident code was executed. The page publishes aggregate statistics, first-name labels and short, rule-selected excerpts of agent-generated messages and reviews. It does not include source code, application forms, private memory or contact details.</p>
-    <p><b>Acknowledgements.</b> The case studies and family classifications come from an earlier automated audit of the same record by GPT-6.1 Sol and GPT-6.2 Astra. Charts are rendered with D3.</p>
+    <p><b>Acknowledgements.</b> The selected project paths and family classifications build on earlier log analyses by GPT-6.1 Sol and GPT-6.2 Astra. Charts are rendered with D3.</p>
   </div>
 </footer>
 <script src="static/js/charts.js"></script>

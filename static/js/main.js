@@ -13,6 +13,32 @@
   const AU = X.audit, O = D.overview;
   const wilson = (k, n) => { const z = 1.96, p = k / n, d = 1 + z * z / n, c = (p + z * z / (2 * n)) / d, h = z * Math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / d; return [Math.max(0, c - h), Math.min(1, c + h)]; };
 
+  const workUnit = $("work-unit");
+  const shareOption = workUnit.querySelector('input[value="share"]');
+  const byAuthor = D.team_work.authorship.map((row) => ({ ...row, total: row.outside_run + row.no_outside_run }));
+  function renderAuthorship() {
+    const byShare = shareOption.checked;
+    const chart = $("fig-builders");
+    C.bars(chart, {
+      data: byAuthor.map((row) => ({ ...row,
+        outside: byShare ? row.outside_run / row.total : row.outside_run,
+        without: byShare ? row.no_outside_run / row.total : row.no_outside_run,
+      })),
+      x: "group", keys: ["outside", "without"], stacked: true, colors: ["--s1", "--neutral"],
+      yMax: byShare ? 1 : 50, yFormat: byShare ? pct : undefined,
+      yLabel: byShare ? "share of entries" : "project entries", height: 220,
+      tipFmt: (row) => `<b>${esc(row.group)}</b><br>Outside run: ${row.outside_run} of ${row.total} (${pct(row.outside_run / row.total)})`,
+    });
+    const [solo, multi] = byAuthor;
+    const summary = byShare
+      ? `An outside agent ran ${pct(solo.outside_run / solo.total)} of single-author entries and ${pct(multi.outside_run / multi.total)} of multi-author entries.`
+      : `An outside agent ran ${solo.outside_run} of the ${solo.total} single-author entries and ${multi.outside_run} of the ${multi.total} multi-author entries.`;
+    $("work-reading").textContent = summary;
+    chart.querySelector("svg").setAttribute("aria-label", `Authorship and outside execution. ${summary}`);
+  }
+  workUnit.addEventListener("change", renderAuthorship);
+  C.register(renderAuthorship);
+
   $("run-stats").innerHTML = [
     [fmt(AU.calls), "model calls audited"], [fmt(O.messages), "agent-written messages"], [fmt(O.revisions), "source revisions"],
     [fmt(O.executions), "sandboxed executions"], [fmt(O.reviews), "judge reviews"], ["$" + Math.round(O.usd), "API-equivalent spend"],
@@ -28,11 +54,11 @@
   const re = Object.fromEntries(AU.read_errors.map((e) => [e.error, e.n]));
   const items = [
     ["sev-high", "High", "Platform receipts recorded as talk", `${AU.auto_posts} of ${fmt(AU.messages_total)} chat messages (${pct(AU.auto_posts / AU.messages_total)}) were posted by the platform under an agent's name: ${AU.post_kinds.run} execution receipts, ${AU.post_kinds.revision} revision notices, ${AU.post_kinds.review} review notices and ${AU.auto_posts - AU.post_kinds.run - AU.post_kinds.revision - AU.post_kinds.review} workspace posts. They are excluded from all talk measures.`],
-    ["sev-high", "High", "A worker died and was not revived", `${dead.agent} stopped at ${dead.outages[0][0].toFixed(1)} active h and made one call after the pause. Absent for ${dead.outage_h.toFixed(1)} of ${AU.active_h.toFixed(1)} h (${dead.calls} calls vs ${AU.calls_range_others[0]}–${AU.calls_range_others[1]} for everyone else). Worker supervision logged no repair.`],
+    ["sev-high", "High", "A worker stopped", `${dead.agent} stopped at ${dead.outages[0][0].toFixed(1)} active h and made only one later call. Absent for ${dead.outage_h.toFixed(1)} of ${AU.active_h.toFixed(1)} h (${dead.calls} calls vs ${AU.calls_range_others[0]}–${AU.calls_range_others[1]} for everyone else). Worker supervision logged no repair.`],
     ["sev-mid", "Medium", "The hypothesis was in the prompt", `Every one of ${fmt(AU.calls)} system prompts stated the study's aim and told agents to separate drafts from tested and validated work. That plausibly shapes the evidence-heavy talk.`],
     ["sev-mid", "Medium", "Reads of unpublished work", `${fmt(pr.failed)} of ${fmt(pr.total)} project reads failed: ${re["Publish source files before running or reviewing"]} because the source was not yet published, ${re["Source file not found"]} for missing files. Web reads failed ${wr.failed}/${wr.total} (mostly HTTP 403), artifact fetches ${pa.failed}/${pa.total}.`],
     ["sev-ok", "OK", "Ledger reconciles with raw responses", `Raw responses: ${fmt(AU.audit_tokens.in)} input / ${fmt(AU.audit_tokens.out)} output tokens. Ledger: ${fmt(rec.in)} / ${fmt(rec.out)} (exact match).`],
-    ["sev-ok", "OK", "Responses are well-formed", `${AU.provider_errors} provider errors and ${AU.parse_errors} unparseable actions in ${fmt(AU.calls)} calls. Median model latency ${AU.latency_median_s} s (p90 ${AU.latency_p90_s} s). The operator pause (${AU.pauses_h.toFixed(1)} h) is excluded from the clock.`],
+    ["sev-ok", "OK", "Responses are well-formed", `${AU.provider_errors} provider errors and ${AU.parse_errors} unparseable actions in ${fmt(AU.calls)} calls. Median model latency ${AU.latency_median_s} s (p90 ${AU.latency_p90_s} s).`],
   ];
   $("audit-items").innerHTML = items.map(([c, s, h, p]) => `<div class="audit-item ${c}"><span class="sev">${s}</span><h4>${h}</h4><p>${esc(p)}</p></div>`).join("");
   const unk = AU.usage_rows.filter((u) => u.status !== "recorded").reduce((a, u) => a + u.rows, 0);
@@ -42,7 +68,7 @@
     ["Input tokens: raw responses vs ledger", `${fmt(AU.audit_tokens.in)} vs ${fmt(rec.in)}`, "exact match"],
     ["Output tokens: raw responses vs ledger", `${fmt(AU.audit_tokens.out)} vs ${fmt(rec.out)}`, "exact match"],
     ["Chat messages: total / agent-written", `${fmt(AU.messages_total)} / ${fmt(AU.messages_total - AU.auto_posts)}`, "receipts excluded"],
-    ["Active / paused hours", `${AU.active_h.toFixed(2)} / ${AU.pauses_h.toFixed(2)}`, "pause excluded"],
+    ["Active hours", AU.active_h.toFixed(2), "active clock"],
     ["Spend (API-equivalent)", "$" + rec.usd.toFixed(2), "—"],
   ].map((r) => `<tr>${r.map((c) => `<td>${esc(c)}</td>`).join("")}</tr>`).join("")}</tbody>`;
 
@@ -138,7 +164,7 @@
       tipFmt: (r, j) => `<b>${r.agent}</b> (${r.archetype})<br>${X.division.roles[j]}: ${r.counts[j]} (${pct(r.share[j])} of actions)<br>specialisation ${r.specialisation.toFixed(2)}`,
     });
 
-    // Fig 8: lorenz + builders
+    // Concentration by activity
     const L = X.division.lorenz, G = X.division.gini;
     C.line($("fig-lorenz"), {
       series: [
@@ -149,12 +175,16 @@
       ],
       xMax: 1, yMax: 1, xFormat: d3.format(".0%"), yFormat: d3.format(".0%"), xLabel: "share of residents (least active first) →", height: 260, directLabels: false,
     });
-    const bh = Object.entries(X.division.builders_hist).map(([k, v]) => ({ k: k + (k === "1" ? " author" : " authors"), n: v }));
-    C.bars($("fig-builders"), { data: bh, x: "k", keys: ["n"], colors: ["--s1"], names: ["projects"], yLabel: "projects", height: 260, tipFmt: (d) => `<b>${d.k}</b><br>${d.n} projects` });
 
     // Fig 9: room sizes + talk/build
     const tot = d3.sum(X.room_sizes, (r) => r.messages);
-    const rs = [2, 3, 4, 5].map((s) => { const r = X.room_sizes.find((x) => x.size === s) || { messages: 0, rooms: 0 }; return { size: s + " members", p: r.messages / tot, n: s === 2 ? 1 : 0, rooms: r.rooms, msgs: r.messages }; });
+    const smallRooms = X.room_sizes.filter((row) => row.size <= 2);
+    const largeRooms = X.room_sizes.filter((row) => row.size >= 3);
+    const rs = [smallRooms, largeRooms].map((rows, i) => {
+      const msgs = d3.sum(rows, (row) => row.messages);
+      return { size: i === 0 ? "1–2 speakers" : "3–5 speakers", p: msgs / tot, n: i === 0 ? 1 : 0,
+        rooms: d3.sum(rows, (row) => row.rooms), msgs };
+    });
     C.bars($("fig-roomsize"), {
       data: rs, x: "size", keys: ["p", "n"], colors: ["--s1", "--s2"], names: ["Projects", "Networking"], yFormat: d3.format(".0%"), yMax: 1, yLabel: "share of messages", height: 260,
       tipFmt: (d, k) => k === "p" ? `<b>Projects · ${d.size}</b><br>${d.rooms} rooms · ${fmt(d.msgs)} messages (${pct(d.p)})` : `<b>Networking · ${d.size}</b><br>${d.n ? "all 207 rooms" : "no rooms"}`,

@@ -122,6 +122,30 @@ def main():
     out["room_sizes"] = [{"size": k, "rooms": size_rooms[k], "messages": size_msgs[k]} for k in sorted(size_rooms)]
     out["rooms_with_judge"] = sum(1 for a in active.values() if a & judge_ids)
 
+    # Count collaboration on project entries separately from conversation membership.
+    author_groups = collections.defaultdict(collections.Counter)
+    outside_creator = set()
+    for project in S["projects"]:
+        authors = {revision["author"] for revision in project["revisions"]}
+        if not authors:
+            continue
+        runners = {run["author"] for run in project["runs"]}
+        group = author_groups["One author" if len(authors) == 1 else "Multiple authors"]
+        group["outside_run" if runners - authors else "no_outside_run"] += 1
+        outside_creator.update(revision["author"] for revision in project["revisions"]
+                               if revision["author"] != project["author"])
+    handoffs = [json.loads(t["result"]) for t in S["tools"]
+                if t["name"] == "project_handoff" and t["status"] == "completed"]
+    handed_projects = [result["data"]["project_id"] for result in handoffs if result.get("ok")]
+    out["team_work"] = {
+        "authorship": [{"group": name, "outside_run": author_groups[name]["outside_run"],
+                        "no_outside_run": author_groups[name]["no_outside_run"]}
+                       for name in ("One author", "Multiple authors")],
+        "non_creator_authors": len(outside_creator),
+        "handoff_events": len(handed_projects),
+        "projects_with_handoffs": len(set(handed_projects)),
+    }
+
     G = nx.Graph()
     G.add_nodes_from(members)
     for r, a in active.items():

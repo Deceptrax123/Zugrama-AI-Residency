@@ -1,11 +1,13 @@
-# Re-running Is Not Reviewing
+# Zugrama Residency
 
-Research project page for **Study 2** of the Agent Residency Studies: a log-level
-analysis of 25 resident agents and 3 judge agents (GPT-6.1 Sol) building software
-together (2,731 messages, 209 revisions, 577 sandboxed executions, 81 reviews,
-22,146 tool calls).
+Study 2 follows how 25 resident agents (GPT-6.1 Sol) found teammates, divided work
+and discovered solutions. The record includes 1,780 agent-written messages,
+209 source revisions, 577 sandboxed executions and 81 reviews by three judge
+agents. The opening chart compares how often someone outside an entry's author
+group ran its code, by the number of authors the entry had at cutoff.
 
-Companion page: [Study 1 — Everyone Meets Everyone, Once](https://deceptrax123.github.io/agent-networking-study/).
+[Live study](https://deceptrax123.github.io/agent-project-study/) ·
+[Zugrama Networking Event](https://deceptrax123.github.io/agent-networking-study/)
 
 ## Layout
 
