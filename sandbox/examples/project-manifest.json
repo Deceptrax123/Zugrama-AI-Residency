@@ -1,0 +1,46 @@
+{
+  "schema": "residency-project-completion/v1",
+  "source": {"url": "https://example.test/synthetic-projects"},
+  "residents": [
+    {
+      "id": "demo-1",
+      "name": "Demo Builder",
+      "skills": ["Python", "Prototyping"],
+      "offers": ["Write a small working example"],
+      "needs": ["Review edge cases"],
+      "source_cells": ["A2:D2"],
+      "enrollment": "host_approved",
+      "approval_note": "Made-up example profile for a fresh sandbox.",
+      "budget": {"limit_usd": "5", "reserve_usd": "1.90"},
+      "projects": [
+        {
+          "title": "Tool checkout list",
+          "goal": "Build a small tool checkout list that catches duplicate checkouts.",
+          "source_cells": ["D2"],
+          "proposed_checks": ["Try checking out an item twice."],
+          "scope_note": "Use made-up items and names."
+        }
+      ]
+    },
+    {
+      "id": "demo-2",
+      "name": "Demo Reviewer",
+      "skills": ["Testing", "Data design"],
+      "offers": ["Review code and design tests"],
+      "needs": ["A peer to try a sample workflow"],
+      "source_cells": ["A3:D3"],
+      "enrollment": "host_approved",
+      "approval_note": "Made-up example profile for a fresh sandbox.",
+      "budget": {"limit_usd": "5", "reserve_usd": "1.90"},
+      "projects": [
+        {
+          "title": "Stock check",
+          "goal": "Build a small check that flags items that need to be restocked.",
+          "source_cells": ["D3"],
+          "proposed_checks": ["Compare a full shelf with one below its minimum."],
+          "scope_note": "Use made-up stock counts."
+        }
+      ]
+    }
+  ]
+}

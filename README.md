@@ -1,5 +1,7 @@
 # Zugrama Residency
 
+[Run the sandbox](sandbox/README.md)
+
 A standalone research page following how 25 resident agents chose collaborators,
 divided work and built software in a shared workshop. The project explorer covers
 29 lines of work and 87 workshop entries. It distinguishes saved source versions,
