@@ -99,6 +99,34 @@ CONFLICTS = {
     "recovery-advice-accepted-not-delivered": "Would the restart repair be delivered?",
 }
 
+WORK_SPLITS = {
+    "memory": "Anuj offered to build local memory. Hiro proposed an approval step, and Aditya offered to review how records would be replayed.",
+    "d01": "Rajat kept the simulated controller. Dhruv offered independent tests, and Sachit took the consent gate.",
+    "value": "Moses and Mahboob joined their record and contribution ideas. They split the disclosure, implementation and review work.",
+    "bio": "Kishore kept the study design. Amruth supplied fictional evidence cases, and Pratik took a small part of the study design.",
+    "store": "Megabyte asked Gaurav to try the checkout and Vishnu to check what would count as payment evidence.",
+    "sol": "Bristin built storage for the transfer record. Hiro reviewed restart behavior and Megabyte contributed compatibility checks.",
+    "life": "Shrishti built the learning scoreboard. Hiro reviewed permission design, and independent reviewers raised test and scope issues.",
+    "consent": "Dhruv offered to test the consent rules independently. Sachit took the implementation and Moses reviewed how the steps fit together.",
+    "reactor": "Bhuvan and Rajat proposed testing each other’s simulated controllers. Abhinav took a separate monitoring question.",
+    "audit": "Disha asked for help checking a model-warning idea. Srinitish took evaluation checks and Hiro reviewed how a warning would be used.",
+    "evidence": "Amruth took the evidence engine and example cases. Kishore and Pratik offered independent ways to check its output.",
+    "field": "Bhuvan asked how to connect monitoring to the controller. Abhinav proposed a separate tool to decide what sensor data could support.",
+    "adversarial": "Pratik offered an independent checker in exchange for Amruth’s critique. They agreed on what the engine should report.",
+    "force": "Shriyanshi built the search tool. Gaurav asked for a project he could actually run, and Anuj took a separate retrieval check.",
+    "qa": "Gaurav described what an independent tester should be able to verify. Srinitish agreed to build an environment that records the result.",
+    "block": "Shardul gathered accounts of blocked work. Amruth helped define evidence, and Srinitish agreed to build a checker for the reports.",
+    "lending": "Vishnu kept the lending model. Bristin offered independent checks, and Moses’s disclosure work provided a separate use case.",
+    "cost": "Pratik owned the audit-budget model. Mahboob narrowed its scope, and Moses offered independent accounting checks.",
+    "unblock": "Mahboob proposed recording contributions to the civic tool. Aditya supplied the reporting history, and Sachit took independent checks.",
+    "assimilator": "Shriyanshi built the record store. Alipat took the import workflow and acceptance tests, and three reviewers took separate checks.",
+    "readiness": "Ganesh requested a handoff checklist. Shardul took the checker and Aditya started connecting it to the civic tool.",
+    "recovery": "The team separated exploratory recovery research from building the consent gate. Dhruv took the evaluation.",
+    "fieldmap": "Shardul collected coordination cases. Amruth reviewed the inferences and Srinitish checked how the cases were recorded.",
+    "heatwriting": "Alipat and Shardul agreed to write about how groups could handle conflicting heat information. Alipat drafted and Shardul reviewed.",
+    "qareport": "Gaurav took independent walkthroughs and failure reports. Shardul helped distinguish the different kinds of evidence.",
+}
+
 
 def read(name):
     return json.loads((EVALUATIONS / f"final-{name}.json").read_text())
@@ -109,19 +137,85 @@ def short_name(name):
     return labels.get(name, name.split()[0].capitalize())
 
 
-def case_traces(active_hours, cases):
+def evidence_index(snapshot):
+    index = defaultdict(list)
+
+    def add(kind, key, record, author):
+        index[kind, key].append((record["created_at"], snapshot["names"].get(record[author], "Project record")))
+
+    automated = set()
+    for project in snapshot["projects"]:
+        for run in project["runs"]:
+            add("run", run["id"], run, "author")
+        for revision in project["revisions"]:
+            add("revision", f'{project["id"]}:{revision["revision"]}', revision, "author")
+    for review in snapshot["reviews"]:
+        add("review", review["id"], review, "judge")
+    for workspace in snapshot["workspaces"]:
+        for revision in workspace["revisions"]:
+            add("workspace", f'{workspace["id"]}:{revision["revision"]}', revision, "owner_id")
+            add("workspace", workspace["id"], revision, "owner_id")
+            automated.add(revision.get("message_id"))
+    for message in snapshot["messages"]:
+        if message["id"] not in automated:
+            add("message", message["id"], message, "sender_id")
+    return index
+
+
+def case_traces(active_hours, cases, families, catalog, snapshot):
     def marker(turn, title, detail):
         return {"h": round(active_hours(turn["at"]), 4), "person": short_name(turn["who"]),
                 "title": title, "detail": detail}
 
     paths = {path["key"]: path for path in read("collaboration-paths")["paths"]}
-    conversation_paths = [
-        {"title": title, "project": project,
+    featured = {
+        project: {"title": title, "project": project, "featured": True,
          "steps": [marker(min(stage["exchanges"], key=lambda turn: turn["at"]),
-                          step_title, detail)
+                          step_title, detail) | {"kind": "Conversation"}
                    for stage, (step_title, detail) in zip(paths[key]["stages"], steps, strict=True)]}
         for key, (title, project, steps) in CONVERSATIONS.items()
-    ]
+    }
+    labour = {row["key"]: row for row in read("labour")["projects"]}
+    evidence = evidence_index(snapshot)
+    kinds = {"message": "Conversation", "run": "Code run", "review": "Review",
+             "revision": "Source save", "workspace": "Saved work"}
+
+    def linked_records(refs):
+        return [(when, who, ref["type"]) for ref in refs
+                for when, who in evidence.get((ref["type"], ref["id"]), [])]
+
+    def recorded_step(when, who, kind, title, detail):
+        return marker({"at": when, "who": who}, title, detail) | {"kind": kind}
+
+    conversation_paths = []
+    for row in catalog:
+        project = row["key"]
+        if project in featured:
+            conversation_paths.append(featured[project])
+            continue
+        allocation_refs = [ref for item in labour[project]["allocation"] for ref in item["refs"]]
+        when, who, _ = min(record for record in linked_records(allocation_refs) if record[2] == "message")
+        steps = [recorded_step(when, who, "Conversation", "Discuss how to divide the work", WORK_SPLITS[project])]
+        seen = {when}
+        for item in labour[project]["handoffs"]:
+            messages = [record for record in linked_records(item["refs"]) if record[2] == "message"]
+            if messages:
+                when, who, _ = min(messages)
+                if when not in seen:
+                    steps.append(recorded_step(when, who, "Conversation", "Discuss what can be handed over", item["text"]))
+                    seen.add(when)
+        milestones = sorted(families[project]["evolution"], key=lambda step: step["at"])
+        for i in sorted({0, len(milestones) // 2, len(milestones) - 1}):
+            event = milestones[i]
+            near = min(linked_records(event["refs"]), key=lambda record: abs(record[0] - event["at"]), default=None)
+            if near is None or abs(near[0] - event["at"]) > 1:
+                near = (event["at"], "Project record", None)
+            when, who, kind = near
+            if when not in seen:
+                steps.append(recorded_step(when, who, kinds.get(kind, "Milestone"), event["label"], event["text"]))
+                seen.add(when)
+        conversation_paths.append({"title": row["title"], "project": project, "featured": False,
+                                   "steps": sorted(steps, key=lambda step: step["h"])})
     case_by_key = {case["key"]: case for case in cases}
     conflict_paths = []
     for key, title in CONFLICTS.items():
@@ -249,7 +343,7 @@ def build():
         "conflict_topics": dict(Counter(case["claim_type"] for case in conflicts)),
         "catalog": catalog,
         "activity": {"hours": round(hours, 3), "bins": activity},
-        "traces": case_traces(active_hours, conflicts),
+        "traces": case_traces(active_hours, conflicts, families, catalog, snapshot),
     }
 
 

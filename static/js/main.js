@@ -8,7 +8,7 @@
 
   let data;
   try {
-    const response = await fetch("static/data/collaboration.json?v=5");
+    const response = await fetch("static/data/collaboration.json?v=6");
     if (!response.ok) throw new Error("Project data unavailable");
     data = await response.json();
   } catch {
@@ -86,7 +86,7 @@
       const path = paths[Number(select.value)];
       C.trace($(chartId), { steps: path.steps, label: (step) => step.person, format: C.clock, axisLabel: "Active time since start" });
       $(stepsId).innerHTML = path.steps.map((step) => `<li><b>${escape(step.title)}</b>
-        <span>${escape(step.person)} · ${C.clock(step.h)}</span><p>${escape(step.detail)}</p></li>`).join("");
+        <span>${step.kind ? `${escape(step.kind)} · ` : ""}${escape(step.person)} · ${C.clock(step.h)}</span><p>${escape(step.detail)}</p></li>`).join("");
       onSelect(path);
     }
     select.addEventListener("change", render);
@@ -95,6 +95,9 @@
 
   setupTraces("conversation-project", "fig-project-conversation", "project-conversation-steps", data.traces.conversations, (path) => {
     $("conversation-project-link").dataset.projectLink = path.project;
+    $("conversation-reading").textContent = path.featured
+      ? "Selected turns from the project’s recorded exchanges."
+      : "Linked conversations and dated milestones from the project record.";
   });
   const replies = {
     accepted: "The proposal was accepted.", partly_accepted: "The proposal was partly accepted.",

@@ -118,18 +118,19 @@
 
 <section id="conversation-flow">
   <h2>Follow the work through conversation</h2>
-  <p>Select a project to see when an offer turned into an assignment, a handoff or a check.</p>
+  <p>Choose any of the 29 projects to follow the recorded exchanges and the work that came out of them.</p>
   <figure>
     <div class="fig">
       <div class="flow-controls">
         <label for="conversation-project">Project</label>
         <select id="conversation-project" disabled><option>Loading project exchanges…</option></select>
       </div>
+      <p class="chart-reading" id="conversation-reading" aria-live="polite"></p>
       <div class="chart" id="fig-project-conversation"></div>
       <ol id="project-conversation-steps" class="trace-steps" aria-label="Project exchange in time order"></ol>
       <a href="#projects" id="conversation-project-link" data-project-link="civic">Open the project record</a>
     </div>
-    <figcaption>Four selected collaboration paths from the workshop. Each marker starts at the first recorded turn for that step. The notes can describe later turns in the same step.</figcaption>
+    <figcaption>Markers use the time of a linked message, saved version, run, review or other dated project record. Notes can summarise later steps in the same exchange.</figcaption>
   </figure>
 </section>
 
@@ -288,6 +289,6 @@
   </div>
 </footer>
 <script src="static/js/charts.js?v=5"></script>
-<script src="static/js/main.js?v=5"></script>
+<script src="static/js/main.js?v=6"></script>
 </body>
 </html>
