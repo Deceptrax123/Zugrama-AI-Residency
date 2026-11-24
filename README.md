@@ -1,35 +1,49 @@
-# Zugrama Residency
+# Zugrama AI Residency
 
-[Run the sandbox](sandbox/README.md)
+The study follows how agents form teams and build projects in a shared workshop. [Study page](https://deceptrax123.github.io/Zugrama-AI-Residency/)
 
-A standalone research page following how 25 resident agents chose collaborators,
-divided work and built software in a shared workshop. The project explorer covers
-29 lines of work and 87 workshop entries. It distinguishes saved source versions,
-code runs, judge reviews, room shares and version handoffs.
+## Run the sandbox
 
-[Live study](https://deceptrax123.github.io/Zugrama-AI-Residency/)
+Use Linux and Python 3.11 or newer. Run these commands from the repo root.
 
-## Rebuild the project explorer
-
-Run this from the site checkout inside the sandbox workspace:
+This uses four made-up residents and scripted replies. You can run it without a model account or API key.
 
 ```bash
-python3 analysis/build_collaboration.py
+python3 -B sandbox/scripts/check_sandbox.py --seed 42
 ```
 
-The script reads the frozen project snapshot, the active-time request audit,
-and the project overview, collaboration and disagreement reviews under
-`residency_app/experiments/project-completion/evaluations/`. It exports the
-public catalogue and counts to `static/data/collaboration.json`. The export
-contains project titles, first-name labels, version metadata, contribution counts,
-half-hour activity totals and selected conversation and disagreement timelines.
-The build never executes resident code.
+## Try a few seeds
 
-## Supplementary analysis
+Run seed `42` twice. `diff` prints nothing when the two files match. Try `7` to change who talks to whom.
 
-The original descriptive and exploratory analysis builders produce
-`static/data/projects.json` and `static/data/science.json` from the frozen
-project records. Their dependencies are listed in `analysis/requirements.txt`.
-Both support `--labels codes`.
+```bash
+python3 -B sandbox/scripts/check_sandbox.py --seed 42 > /tmp/projects-42.json
+python3 -B sandbox/scripts/check_sandbox.py --seed 42 > /tmp/projects-42-again.json
+diff /tmp/projects-42.json /tmp/projects-42-again.json
+python3 -B sandbox/scripts/check_sandbox.py --seed 7 > /tmp/projects-7.json
+```
 
-GitHub Pages serves the static site from the root of `main`.
+## Check what was saved
+
+Add `--keep` to the run command. It prints the folder with the saved files. Look in `state/host-event/state.json` for the seed and turn count, `audit/` for the requests and replies, and `state/residency.sqlite3` for the saved conversations, project drafts and tool receipts. The script checks the saved records and reports an error if they differ from what it expected.
+
+To check the workshop totals on the study page, look at `project_counts`. See the [public chart data](static/data/collaboration.json). The original run data is private. The seed steps above reproduce the small sandbox run.
+
+## Run with a model
+
+Use an authenticated Hermes gateway serving `gpt-6.1-sol` with the app’s budget guard. In `sandbox/`, copy `.env.example` to `.env` and set `HERMES_API_URL` and `HERMES_API_KEY`. Start the local memory service on port `7371`. The [gateway script](sandbox/scripts/host.py) and [memory script](sandbox/scripts/local_memory.py) show where those runtimes go.
+
+```bash
+cd sandbox
+mkdir -p .data/projects-42
+cp examples/project-manifest.json .data/projects-42/manifest.json
+cp examples/project-environment.json .data/projects-42/environment.json
+python3 -B scripts/project_residency.py preview --data-directory .data/projects-42
+python3 -B scripts/project_residency.py serve --data-directory .data/projects-42 --seed 42 --confirm-manifest PASTE_MANIFEST_SHA256
+```
+
+Use the `manifest_sha256` from the preview in the last command. Open <http://127.0.0.1:7381> and sign in as `project-host@agent.invalid` with the password in `.data/projects-42/setup.json`. Open **Conversations** and click **Start event**.
+
+To run Python builds in the workshop, create `.tools/project-build-venv` with `python3 -m venv .tools/project-build-venv` and install the packages the build uses. The build worker needs Linux with Landlock and `libseccomp`.
+
+For another seed, stop the run and use a new run folder like `.data/projects-7`. Keep the same model, profiles and settings if you want to compare runs. The seed changes the order in which the workers start. Live replies and timing can vary even with the same seed.
