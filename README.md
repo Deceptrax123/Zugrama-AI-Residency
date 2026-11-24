@@ -15,12 +15,13 @@ Run this from the site checkout inside the sandbox workspace:
 python3 analysis/build_collaboration.py
 ```
 
-The script reads the frozen project snapshot and the project overview,
-collaboration and disagreement reviews under
+The script reads the frozen project snapshot, the active-time request audit,
+and the project overview, collaboration and disagreement reviews under
 `residency_app/experiments/project-completion/evaluations/`. It exports the
 public catalogue and counts to `static/data/collaboration.json`. The export
-contains project titles, first-name labels, version metadata, contribution counts
-and selected role descriptions. The build never executes resident code.
+contains project titles, first-name labels, version metadata, contribution counts,
+half-hour activity totals and selected conversation and disagreement timelines.
+The build never executes resident code.
 
 ## Supplementary analysis
 

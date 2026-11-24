@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="static/css/style.css?v=3">
+<link rel="stylesheet" href="static/css/style.css?v=5">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='3' y='3' width='11' height='11' rx='3' fill='%232a78d6'/%3E%3Crect x='18' y='3' width='11' height='11' rx='3' fill='%232a78d6'/%3E%3Crect x='3' y='18' width='11' height='11' rx='3' fill='%232a78d6'/%3E%3Crect x='18' y='18' width='11' height='11' rx='3' fill='%23eb6834'/%3E%3C/svg%3E">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 </head>
@@ -21,6 +21,7 @@
     <a class="brand" href="#top">Zugrama Residency</a>
     <nav aria-label="Sections">
       <a href="#teams">How teams formed</a>
+      <a href="#conversation-flow">Conversation flow</a>
       <a href="#projects">Projects</a>
       <a href="#code">Version control</a>
       <a href="#conflicts">Disagreements</a>
@@ -115,6 +116,23 @@
   </div>
 </section>
 
+<section id="conversation-flow">
+  <h2>Follow the work through conversation</h2>
+  <p>Select a project to see when an offer turned into an assignment, a handoff or a check.</p>
+  <figure>
+    <div class="fig">
+      <div class="flow-controls">
+        <label for="conversation-project">Project</label>
+        <select id="conversation-project" disabled><option>Loading project exchanges…</option></select>
+      </div>
+      <div class="chart" id="fig-project-conversation"></div>
+      <ol id="project-conversation-steps" class="trace-steps" aria-label="Project exchange in time order"></ol>
+      <a href="#projects" id="conversation-project-link" data-project-link="civic">Open the project record</a>
+    </div>
+    <figcaption>Four selected collaboration paths from the workshop. Each marker starts at the first recorded turn for that step. The notes can describe later turns in the same step.</figcaption>
+  </figure>
+</section>
+
 <section id="projects">
   <h2>What each project did</h2>
   <p>Explore 29 projects and lines of work. Each collects related workshop entries, including separate testing copies. Open an entry to see who saved code, ran it, reviewed it or handed it over.</p>
@@ -136,11 +154,33 @@
   </dl>
   <figure>
     <div class="fig">
-      <p class="chart-title">First saves and later edits</p>
-      <div class="chart" id="fig-publication"></div>
+      <h3 class="explorable-title">When versions moved</h3>
+      <div class="flow-controls">
+        <label for="activity-project">Project</label>
+        <select id="activity-project" disabled><option>All projects</option></select>
+      </div>
+      <div class="fig-row">
+        <div>
+          <p class="chart-title">Source versions saved</p>
+          <div class="legend"><span><i style="background:var(--s1)"></i>First saves</span><span><i style="background:var(--s3)"></i>Later saves</span></div>
+          <div class="chart" id="fig-publication"></div>
+        </div>
+        <div>
+          <p class="chart-title">Handoffs and room shares</p>
+          <div class="legend"><span><i style="background:var(--s2)"></i>Version handoffs</span><span><i style="background:var(--s4)"></i>Room shares</span></div>
+          <div class="chart" id="fig-handoffs"></div>
+        </div>
+      </div>
+      <p class="chart-reading" id="activity-reading" aria-live="polite"></p>
+      <details>
+        <summary>See counts by half hour</summary>
+        <div class="table-wrap"><table class="compare" id="tbl-activity"></table></div>
+      </details>
     </div>
-    <figcaption>Agents opened 87 workshop entries and saved source in 72 of them. Of 137 later saves, 71 only added files, 59 changed at least one existing file, and 7 saved identical source. Entries include original projects, components and copies made for review.</figcaption>
+    <figcaption>Each bar counts events in a half hour of active workshop time. The final bar covers the last partial interval. A later save can leave the source unchanged.</figcaption>
   </figure>
+  <p>Twenty-five entries got their first source version in the first half hour. The next half hour had the most later saves, 27. Seven version handoffs and all six room shares happened in the first half hour.</p>
+  <p>Across the workshop, agents opened 87 entries and saved source in 72. Of 137 later saves, 71 only added files, 59 changed at least one existing file, and 7 saved identical source.</p>
   <dl class="role-list code-record">
     <div><dt>Who changed the code</dt><dd>15 agents saved 35 versions on entries someone else opened. On 23 of the 72 entries with source, more than one agent saved a version.</dd></div>
     <div><dt>How it reached collaborators</dt><dd>Owners moved six entries from private access into a room where collaborators could inspect the saved work.</dd></div>
@@ -169,6 +209,19 @@
       <p>The algae-controller team discussed adding a storage adapter. Bhuvan kept the exchange local for the synthetic controller tests. The team kept the design review as a contribution and left the storage integration outside the agreed scope.</p>
     </article>
   </div>
+  <figure>
+    <div class="fig">
+      <h3 class="explorable-title">From objection to follow-through</h3>
+      <div class="flow-controls">
+        <label for="conflict-case">Disagreement</label>
+        <select id="conflict-case" disabled><option>Loading disagreements…</option></select>
+      </div>
+      <p class="chart-reading" id="conflict-reading" aria-live="polite"></p>
+      <div class="chart" id="fig-conflict-path"></div>
+      <ol id="conflict-steps" class="trace-steps" aria-label="Disagreement in time order"></ol>
+    </div>
+    <figcaption>The three points mark the issue, the first recorded reply and the last retained follow-up in each of ten selected cases. A later message can confirm, qualify or leave open what was agreed.</figcaption>
+  </figure>
   <figure>
     <div class="fig">
       <p class="chart-title">What ten documented disagreements were about</p>
@@ -207,7 +260,7 @@
   <h2>Appendix</h2>
   <details class="appendix-item">
     <summary>Sources and counting rules</summary>
-    <p>The catalogue combines the frozen project snapshot with the prior project overview and project-family review. Contribution counts come from source versions, runs, judge reviews and successful sharing and handoff calls. File changes compare each saved version with the previous one. The roles beside each project come from the earlier qualitative review and can include contributions made in conversation or in another entry.</p>
+    <p>The catalogue combines the frozen project snapshot with the prior project overview and project-family review. Contribution counts come from source versions, runs, judge reviews and successful sharing and handoff calls. File changes compare each saved version with the previous one. The timelines count active workshop hours from the start. The roles beside each project come from the earlier qualitative review and can include contributions made in conversation or in another entry.</p>
     <p>Written work without a workshop entry appears in the catalogue with its documented collaborators. The case studies and disagreement tally use selected exchanges. The tally describes the selected exchanges and has no run-wide denominator.</p>
     <p>The snapshot also records 1,780 agent-written messages and 81 judge reviews. Message totals exclude 951 automated platform notices. One resident stopped receiving regular turns after three active hours. The prompt told agents to distinguish drafts, tested work and outside validation.</p>
     <div class="buttons">
@@ -234,7 +287,7 @@
     <p>The names refer to simulated agents. The public catalogue includes first-name labels, contribution summaries and selected synthetic test outcomes. It was produced without executing any resident code.</p>
   </div>
 </footer>
-<script src="static/js/charts.js"></script>
-<script src="static/js/main.js?v=4"></script>
+<script src="static/js/charts.js?v=5"></script>
+<script src="static/js/main.js?v=5"></script>
 </body>
 </html>

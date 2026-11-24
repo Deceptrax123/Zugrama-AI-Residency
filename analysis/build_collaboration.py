@@ -5,8 +5,11 @@ Source files, tool payloads, application records and raw messages stay local.
 """
 
 import json
+import math
 from collections import Counter, defaultdict
 from pathlib import Path
+
+from active_clock import make_active_clock, read_request_times
 
 SITE = Path(__file__).resolve().parents[1]
 EVALUATIONS = SITE.parents[1] / "residency_app/experiments/project-completion/evaluations"
@@ -52,6 +55,50 @@ STATUS = {
     "written_artifact": "Written work",
 }
 
+CONVERSATIONS = {
+    "civic-consolidation": ("Civic reporting", "civic", [
+        ("Suggest one project", "Ganesh suggested combining two similar ideas for reporting local problems."),
+        ("Choose the core work", "Aditya agreed to build the reporting workflow and asked Mahboob to choose one part."),
+        ("Divide the responsibilities", "Mahboob chose contribution records. Ganesh accepted intake, and Gaurav took an independent walkthrough."),
+        ("Agree on file boundaries", "The team separated intake from the workflow. Mahboob read Aditya’s version before adding contribution records."),
+        ("Check the shared work", "Independent tests checked the core and the contribution records. Reviewers kept the unfinished storage checks open."),
+    ]),
+    "joint-record-store": ("Sample record importer", "ingest", [
+        ("Offer a trade", "Shriyanshi offered to build an importer in exchange for privacy review."),
+        ("Split implementation and review", "Alipat proposed who would build the importer and who would write the acceptance checks."),
+        ("Agree on a rule for duplicates", "Shriyanshi accepted the work. Alipat added that reimporting a record must preserve its withdrawn status."),
+        ("Save source and leave the test files", "Shriyanshi published the importer and left Alipat to write the independent tests and command-line demo."),
+        ("Consolidate and rerun", "The team gathered the work into one reference version. A rerun passed 50 tests. The instructions-only check was still pending."),
+    ]),
+    "unicode-contract-reuse": ("Bilingual text adapter", "sign", [
+        ("Narrow the idea", "Tuhin offered to preserve Hindi and English text in the memory tool while sign-language examples were unavailable."),
+        ("Accept a shared component", "Anuj agreed to use the delivered adapter in the memory project."),
+        ("Set the scope", "Tuhin committed to retaining the source text and marking unsupported input."),
+        ("Ask permission to copy a version", "Tuhin approved one saved version and asked Anuj to check the receiving copy."),
+        ("Run the receiving copy", "Anuj recorded 16 passing tests in the memory project. Tuhin inspected that result."),
+    ]),
+    "memory-approval-reallocation": ("Memory approval", "export", [
+        ("Match two ideas", "Anuj offered the memory component. Hiro proposed a step where a person could approve what would be shared."),
+        ("Agree on a test case", "They chose a sample maintenance note and agreed what the person would see before approving it."),
+        ("Prepare an independent check", "Anuj saved acceptance tests and Gaurav reviewed them. The two components had yet to run together."),
+        ("Ask to reallocate the work", "Anuj offered to work in Hiro’s existing project and asked which files Hiro planned to edit."),
+        ("Agree on the remaining files", "Hiro and Anuj accepted a file split. The combined version was still pending at the end of the run."),
+    ]),
+}
+
+CONFLICTS = {
+    "retain-lifecycle-fix-expectation": "Which status should the civic test expect?",
+    "no-civic-memory-consumer": "Did civic reporting need memory lookup?",
+    "close-checkpoint-retain-broader-label": "What could a passing component close?",
+    "keep-local-fixture-scope": "Did the algae controller need extra storage?",
+    "public-file-sufficient": "Was a public file enough for distribution?",
+    "tracker-review-not-second-app": "A privacy review or a second tracker?",
+    "payment-proof-standard-retained": "What counted as proof of payment?",
+    "assistance-does-not-become-independent-discovery": "Could a coached result count as independent?",
+    "monitor-review-without-invented-integration": "Was there a place for model monitoring?",
+    "recovery-advice-accepted-not-delivered": "Would the restart repair be delivered?",
+}
+
 
 def read(name):
     return json.loads((EVALUATIONS / f"final-{name}.json").read_text())
@@ -62,12 +109,56 @@ def short_name(name):
     return labels.get(name, name.split()[0].capitalize())
 
 
+def case_traces(active_hours, cases):
+    def marker(turn, title, detail):
+        return {"h": round(active_hours(turn["at"]), 4), "person": short_name(turn["who"]),
+                "title": title, "detail": detail}
+
+    paths = {path["key"]: path for path in read("collaboration-paths")["paths"]}
+    conversation_paths = [
+        {"title": title, "project": project,
+         "steps": [marker(min(stage["exchanges"], key=lambda turn: turn["at"]),
+                          step_title, detail)
+                   for stage, (step_title, detail) in zip(paths[key]["stages"], steps, strict=True)]}
+        for key, (title, project, steps) in CONVERSATIONS.items()
+    ]
+    case_by_key = {case["key"]: case for case in cases}
+    conflict_paths = []
+    for key, title in CONFLICTS.items():
+        case = case_by_key[key]
+        proposal = min(case["proposal"]["quotes"], key=lambda turn: turn["at"])
+        reply = min(case["response"]["quotes"], key=lambda turn: turn["at"])
+        later = max(case["later"]["quotes"], key=lambda turn: turn["at"])
+        conflict_paths.append({
+            "title": title, "response": case["response_type"], "follow_through": case["follow_through"],
+            "steps": [marker(proposal, "Issue raised", case["proposal"]["text"]),
+                      marker(reply, "First recorded reply", case["response"]["text"]),
+                      marker(later, "Later evidence", case["later"]["text"])],
+        })
+    return {"conversations": conversation_paths, "conflicts": conflict_paths}
+
+
 def build():
     snapshot = read("snapshot")
     names = snapshot["names"]
     projects = {project["id"]: project for project in snapshot["projects"]}
     families = {family["key"]: family for family in read("narratives")["families"]}
     editorial = {project["key"]: project for project in read("project-overview")["projects"]}
+    active_hours, _ = make_active_clock(snapshot["started_at"], read_request_times())
+    hours = active_hours(snapshot["cutoff_at"])
+    family_for_entry = {project_id: key for key, family in families.items() for project_id in family["project_ids"]}
+    activity = {
+        key: [{"h": i / 2, "first": 0, "later": 0, "handoffs": 0, "shares": 0}
+              for i in range(math.ceil(hours * 2))]
+        for key in ("all", *families)
+    }
+
+    def record_activity(project_id, timestamp, kind):
+        hour = active_hours(timestamp)
+        index = min(max(0, int(hour * 2)), len(activity["all"]) - 1)
+        activity["all"][index][kind] += 1
+        activity[family_for_entry[project_id]][index][kind] += 1
+
     judge_names = {judge["name"] for judge in snapshot["run_configuration"]["environment"]["judges"]}
     reviews_by_project = defaultdict(list)
     for review in snapshot["reviews"]:
@@ -81,6 +172,8 @@ def build():
             if result.get("ok"):
                 event = result["data"]
                 source_events[event["project_id"]].append((tool["name"], tool["owner_id"], event["revision"]))
+                kind = "handoffs" if tool["name"] == "project_handoff" else "shares"
+                record_activity(event["project_id"], tool["finished_at"], kind)
                 if tool["name"] == "project_handoff" and event["shared_receipts"]:
                     handoffs_with_results += 1
                     shared_results += len(event["shared_receipts"])
@@ -109,12 +202,14 @@ def build():
         for rev in sorted(project["revisions"], key=lambda rev: rev["revision"]):
             files = json.loads(rev["files"])
             number = rev["revision"]
+            record_activity(project_id, rev["created_at"], "first" if number == 1 else "later")
             versions.append({
                 "number": number, "author": short_name(names[rev["author"]]), "files": len(files),
                 "added": len(files.keys() - previous.keys()),
                 "changed": sum(files[file] != previous[file] for file in files.keys() & previous.keys()),
                 "removed": len(previous.keys() - files.keys()),
                 "runs": runs_by_version[number], "handoffs": handoffs_by_version[number],
+                "h": round(active_hours(rev["created_at"]), 4),
             })
             previous = files
         return {"title": project["title"], "versions": versions, "people": people}
@@ -153,6 +248,8 @@ def build():
         },
         "conflict_topics": dict(Counter(case["claim_type"] for case in conflicts)),
         "catalog": catalog,
+        "activity": {"hours": round(hours, 3), "bins": activity},
+        "traces": case_traces(active_hours, conflicts),
     }
 
 

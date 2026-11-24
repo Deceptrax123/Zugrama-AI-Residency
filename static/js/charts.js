@@ -414,7 +414,42 @@
     }
   }
 
-  window.Charts = { line, bars, hbars, histogram, scatter, matrix, dots, ranges, network, table, forest, swimlanes, multiples, heat, css, fmt };
+  function clock(hours) {
+    const seconds = Math.max(0, Math.round(hours * 3600));
+    const minutes = String(Math.floor(seconds / 60) % 60).padStart(2, "0");
+    return `${Math.floor(seconds / 3600)}:${minutes}:${String(seconds % 60).padStart(2, "0")}`;
+  }
+
+  /* Selected events in order, with position measured on the run clock. */
+  function trace(el, { steps, label, format, axisLabel }) {
+    const f = frame(el, { height: steps.length * 34 + 70, margin: { top: 16, left: 108, right: 25, bottom: 42 } });
+    const low = d3.min(steps, (step) => step.h);
+    const high = d3.max(steps, (step) => step.h);
+    const padding = Math.max((high - low) * 0.06, 1 / 120);
+    const x = d3.scaleLinear().domain([Math.max(0, low - padding), high + padding]).range([0, f.w]);
+    const y = d3.scalePoint().domain(d3.range(steps.length)).range([0, f.h]).padding(0.6);
+    const ticks = x.ticks(Math.max(2, Math.floor(f.w / 54)));
+    f.g.append("g").attr("class", "grid").attr("transform", `translate(0,${f.h})`)
+      .call(d3.axisBottom(x).tickValues(ticks).tickSize(-f.h).tickFormat(""));
+    f.g.append("g").attr("class", "axis").attr("transform", `translate(0,${f.h})`)
+      .call(d3.axisBottom(x).tickValues(ticks).tickFormat(format).tickSizeOuter(0));
+    f.g.append("text").attr("x", f.w).attr("y", f.h + 34).attr("text-anchor", "end").text(axisLabel);
+    f.g.append("path").attr("fill", "none").attr("stroke", css("--s1")).attr("stroke-opacity", 0.65)
+      .attr("stroke-width", 2)
+      .attr("d", d3.line().x((step) => x(step.h)).y((step, i) => y(i))(steps));
+    steps.forEach((step, i) => {
+      const at = y(i);
+      f.g.append("text").attr("x", -10).attr("y", at).attr("dy", "0.35em").attr("text-anchor", "end")
+        .attr("class", "label-strong").text(label(step, i));
+      const marker = f.g.append("g").attr("transform", `translate(${x(step.h)},${at})`);
+      marker.append("circle").attr("r", 9).attr("fill", css("--surface")).attr("stroke", css("--s1")).attr("stroke-width", 2);
+      marker.append("text").attr("dy", "0.35em").attr("text-anchor", "middle").attr("class", "label-strong").text(i + 1);
+      marker.append("title").text(`${step.title} at ${format(step.h)}`);
+    });
+    f.svg.attr("aria-label", steps.map((step) => `${step.title} at ${format(step.h)}`).join(". "));
+  }
+
+  window.Charts = { trace, clock, line, bars, hbars, histogram, scatter, matrix, dots, ranges, network, table, forest, swimlanes, multiples, heat, css, fmt };
 
   /* ---------- page plumbing: theme toggle, re-render on resize/theme ---------- */
   const renderers = [];

@@ -25,9 +25,9 @@ from statsmodels.stats.contingency_tables import StratifiedTable
 
 sys.path.insert(0, os.path.dirname(__file__))
 import stats as S  # noqa: E402
-from build_data import DB, FAMILIES, SITE, SNAP, WS, category, parse_run  # noqa: E402
+from active_clock import AUDIT, make_active_clock  # noqa: E402
+from build_data import DB, FAMILIES, SITE, SNAP, category, parse_run  # noqa: E402
 
-AUDIT = WS / "residency_app/.data/project-completion-private-run2/audit/1104430f67b74d5cb98979900677588f"
 OUT = SITE / "static/data/science.json"
 TOPIC_RULES = [
     ("Execution receipts & test results", {"tests", "passed", "failed", "receipt", "inspected"}),
@@ -88,12 +88,7 @@ def main():
             assert isinstance(json.loads(ch["message"]["content"]), dict)
         except Exception:
             perr += 1
-    ra = sorted(t for t, _ in reqs)
-    pauses = [(a, b) for a, b in zip(ra, ra[1:]) if b - a > 600]
-
-    def AH(t):
-        """active hours since start (global pauses removed)"""
-        return (t - t0 - sum(min(b, t) - a for a, b in pauses if a < t)) / 3600
+    AH, pauses = make_active_clock(t0, (t for t, _ in reqs))
 
     per_member = collections.defaultdict(list)
     for t, m in reqs:
