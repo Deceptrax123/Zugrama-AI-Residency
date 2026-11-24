@@ -73,19 +73,25 @@ def build():
     for review in snapshot["reviews"]:
         reviews_by_project[review["project_id"]].append(review["judge"])
     source_events = defaultdict(list)
+    handoffs_with_results = 0
+    shared_results = 0
     for tool in snapshot["tools"]:
         if tool["name"] in {"project_handoff", "project_share"} and tool["status"] == "completed":
             result = json.loads(tool["result"])
             if result.get("ok"):
-                source_events[result["data"]["project_id"]].append((tool["name"], tool["owner_id"]))
+                event = result["data"]
+                source_events[event["project_id"]].append((tool["name"], tool["owner_id"], event["revision"]))
+                if tool["name"] == "project_handoff" and event["shared_receipts"]:
+                    handoffs_with_results += 1
+                    shared_results += len(event["shared_receipts"])
 
     def entry(project):
         project_id = project["id"]
         authors = Counter(revision["author"] for revision in project["revisions"])
         runners = Counter(run["author"] for run in project["runs"])
         judges = Counter(reviews_by_project[project_id])
-        handoffs = Counter(actor for kind, actor in source_events[project_id] if kind == "project_handoff")
-        shares = Counter(actor for kind, actor in source_events[project_id] if kind == "project_share")
+        handoffs = Counter(actor for kind, actor, _ in source_events[project_id] if kind == "project_handoff")
+        shares = Counter(actor for kind, actor, _ in source_events[project_id] if kind == "project_share")
         creator = project["author"]
         members = authors.keys() | runners.keys() | judges.keys() | handoffs.keys() | shares.keys() | {creator}
         people = [
@@ -96,11 +102,21 @@ def build():
                 member != creator, -authors[member], -runners[member], -judges[member], names[member].casefold()
             ))
         ]
-        versions = [
-            {"number": rev["revision"], "author": short_name(names[rev["author"]]),
-             "files": len(json.loads(rev["files"]))}
-            for rev in sorted(project["revisions"], key=lambda rev: rev["revision"])
-        ]
+        runs_by_version = Counter(run["revision"] for run in project["runs"])
+        handoffs_by_version = Counter(version for kind, _, version in source_events[project_id] if kind == "project_handoff")
+        versions = []
+        previous = {}
+        for rev in sorted(project["revisions"], key=lambda rev: rev["revision"]):
+            files = json.loads(rev["files"])
+            number = rev["revision"]
+            versions.append({
+                "number": number, "author": short_name(names[rev["author"]]), "files": len(files),
+                "added": len(files.keys() - previous.keys()),
+                "changed": sum(files[file] != previous[file] for file in files.keys() & previous.keys()),
+                "removed": len(previous.keys() - files.keys()),
+                "runs": runs_by_version[number], "handoffs": handoffs_by_version[number],
+            })
+            previous = files
         return {"title": project["title"], "versions": versions, "people": people}
 
     catalog = []
@@ -116,7 +132,7 @@ def build():
     revisions = [(project, rv) for project in versioned for rv in project["revisions"]]
     other_authors = [rv["author"] for project, rv in revisions if rv["author"] != project["author"]]
     handoff_counts = Counter(project_id for project_id, events in source_events.items()
-                             for kind, _ in events if kind == "project_handoff")
+                             for kind, _, _ in events if kind == "project_handoff")
     conflicts = read("contestation")["cases"]
     return {
         "project_counts": {
@@ -129,7 +145,9 @@ def build():
             "agents_contributing_to_others": len(set(other_authors)),
             "handoffs": handoff_counts.total(),
             "entries_with_handoffs": len(handoff_counts),
-            "private_to_room": sum(kind == "project_share" for events in source_events.values() for kind, _ in events),
+            "handoffs_with_results": handoffs_with_results,
+            "attached_results": shared_results,
+            "private_to_room": sum(kind == "project_share" for events in source_events.values() for kind, _, _ in events),
             "public_at_cutoff": sum(p["visibility"]["visibility"] == "public" for p in versioned),
             "runs": sum(len(p["runs"]) for p in projects.values()),
         },

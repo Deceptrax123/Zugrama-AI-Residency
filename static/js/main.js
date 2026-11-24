@@ -8,7 +8,7 @@
 
   let data;
   try {
-    const response = await fetch("static/data/collaboration.json");
+    const response = await fetch("static/data/collaboration.json?v=4");
     if (!response.ok) throw new Error("Project data unavailable");
     data = await response.json();
   } catch {
@@ -19,7 +19,8 @@
   function workshopEntry(entry) {
     const history = entry.versions.length
       ? `<details class="entry-history"><summary>Version history</summary>
-        <ol>${entry.versions.map((version) => `<li>Version ${version.number} · ${escape(version.author)} · ${version.files} files in the saved version</li>`).join("")}</ol>
+        <ol>${entry.versions.map((version) => `<li><b>Version ${version.number} · ${escape(version.author)}</b><br>
+          Files: ${version.added} added, ${version.changed} changed, ${version.removed} removed. Runs: ${version.runs}. Handoffs: ${version.handoffs}.</li>`).join("")}</ol>
       </details>`
       : "<p>No source version was saved in this entry.</p>";
     return `<details class="project-entry">

@@ -22,7 +22,7 @@
     <nav aria-label="Sections">
       <a href="#teams">How teams formed</a>
       <a href="#projects">Projects</a>
-      <a href="#code">Code history</a>
+      <a href="#code">Version control</a>
       <a href="#conflicts">Disagreements</a>
       <a href="#artifacts">Artifacts</a>
       <a href="#appendix">Appendix</a>
@@ -127,19 +127,24 @@
 </section>
 
 <section id="code">
-  <h2>How code moved between agents</h2>
-  <p>Agents saved numbered versions inside the workshop. A save recorded the author and the resulting source snapshot. A handoff pointed someone in the room to one specific version, sometimes with its test result. These are workshop events. The logs contain no Git push events.</p>
+  <h2>How teams kept track of changes</h2>
+  <p>The workshop kept a numbered history for every entry. Agents built their own working agreements around it. They divided responsibility by file, handed over specific versions, and kept tests tied to the source they had actually run.</p>
+  <dl class="role-list code-record">
+    <div><dt>Save against the latest version</dt><dd>Every edit named the version it started from. The workshop would reject a save if the source had changed in the meantime. A successful save recorded the author and a fingerprint of the exact files. The project explorer shows what each version added, changed or removed.</dd></div>
+    <div><dt>Agree on who edits which files</dt><dd>Aditya kept the civic workflow separate from Ganesh’s intake files. Mahboob added contribution records in separate files after reading the workflow. That split gave each agent a defined place to work and a shared interface to test. <a href="#civic-case">See how the team divided the work</a>.</dd></div>
+    <div><dt>Hand over a version someone can check</dt><dd>Agents handed over specific versions 24 times across 20 entries. Twenty-two handoffs included test results, with 26 result attachments in total. When Anuj reused Tuhin’s text adapter, Tuhin approved one snapshot and Anuj tested the receiving copy. <a href="#sign-case">See the adapter handoff</a>.</dd></div>
+  </dl>
   <figure>
     <div class="fig">
       <p class="chart-title">First saves and later edits</p>
       <div class="chart" id="fig-publication"></div>
     </div>
-    <figcaption>Agents opened 87 workshop entries. Source was saved on 72 of them, followed by 137 edits. Entries include original projects, components, and copies made for review.</figcaption>
+    <figcaption>Agents opened 87 workshop entries and saved source in 72 of them. Of 137 later saves, 71 only added files, 59 changed at least one existing file, and 7 saved identical source. Entries include original projects, components and copies made for review.</figcaption>
   </figure>
   <dl class="role-list code-record">
-    <div><dt>Edits by collaborators</dt><dd>15 agents saved 35 versions on entries someone else opened. On 23 of the 72 entries with source, more than one agent saved a version.</dd></div>
-    <div><dt>Sharing and handoffs</dt><dd>Agents handed over specific versions 24 times across 20 entries. Six entries moved from private to room access. One entry with source was marked public inside the simulator at cutoff.</dd></div>
-    <div><dt>Checking the code</dt><dd>The workshop recorded 577 executions. A run is counted whether it passed or failed. Opening an entry, saving code and running someone’s code are shown separately in the project explorer.</dd></div>
+    <div><dt>Who changed the code</dt><dd>15 agents saved 35 versions on entries someone else opened. On 23 of the 72 entries with source, more than one agent saved a version.</dd></div>
+    <div><dt>How it reached collaborators</dt><dd>Owners moved six entries from private access into a room where collaborators could inspect the saved work.</dd></div>
+    <div><dt>What got checked</dt><dd>The workshop recorded 577 runs, including failures. The project explorer counts runs and handoffs against the version they used.</dd></div>
   </dl>
 </section>
 
@@ -202,7 +207,7 @@
   <h2>Appendix</h2>
   <details class="appendix-item">
     <summary>Sources and counting rules</summary>
-    <p>The catalogue combines the frozen project snapshot with the prior project overview and project-family review. Contribution counts are calculated directly from author IDs on source versions, run IDs, judge reviews and successful sharing and handoff calls. The roles beside each project come from the earlier qualitative review and can include contributions made in conversation or in another entry.</p>
+    <p>The catalogue combines the frozen project snapshot with the prior project overview and project-family review. Contribution counts come from source versions, runs, judge reviews and successful sharing and handoff calls. File changes compare each saved version with the previous one. The roles beside each project come from the earlier qualitative review and can include contributions made in conversation or in another entry.</p>
     <p>Written work without a workshop entry appears in the catalogue with its documented collaborators. The case studies and disagreement tally use selected exchanges. The tally describes the selected exchanges and has no run-wide denominator.</p>
     <p>The snapshot also records 1,780 agent-written messages and 81 judge reviews. Message totals exclude 951 automated platform notices. One resident stopped receiving regular turns after three active hours. The prompt told agents to distinguish drafts, tested work and outside validation.</p>
     <div class="buttons">
@@ -229,6 +234,6 @@
   </div>
 </footer>
 <script src="static/js/charts.js"></script>
-<script src="static/js/main.js?v=3"></script>
+<script src="static/js/main.js?v=4"></script>
 </body>
 </html>
