@@ -8,7 +8,7 @@
 
   let data;
   try {
-    const response = await fetch("static/data/collaboration.json?v=7");
+    const response = await fetch("static/data/collaboration.json?v=9");
     if (!response.ok) throw new Error("Project data unavailable");
     data = await response.json();
   } catch {
@@ -16,10 +16,16 @@
     const outcomeStatus = document.getElementById("outcome-status");
     outcomeStatus.hidden = false;
     outcomeStatus.textContent = "The project results could not load. Reload the page to try again.";
+    document.getElementById("conversation-reading").textContent = "The contribution timeline could not load.";
     return;
   }
 
-  const when = (h) => window.Charts ? window.Charts.clock(h) : `${h.toFixed(2)} h`;
+  function when(hours) {
+    if (window.Charts) return window.Charts.clock(hours);
+    const seconds = Math.max(0, Math.round(hours * 3600));
+    const minutes = String(Math.floor(seconds / 60) % 60).padStart(2, "0");
+    return `${Math.floor(seconds / 3600)}:${minutes}:${String(seconds % 60).padStart(2, "0")}`;
+  }
 
   function evidenceCard(checkpoint) {
     const receipts = checkpoint.receipts.map((receipt) => {
@@ -182,10 +188,87 @@
 
   setupOutcomes();
 
+  const $ = (id) => document.getElementById(id);
+
+  function setupContributionTimeline() {
+    const project = $("conversation-project");
+    const filter = $("timeline-kind");
+    const table = $("project-timeline");
+    const startTimes = data.activity.bins.all.map((bin) => bin.h);
+    const types = {
+      discussion: "Cited messages", draft: "Saved drafts", save: "Source saves", run: "Code runs",
+      review: "Formal reviews", handoff: "Version handoffs", share: "Room shares",
+    };
+    const labels = {
+      discussion: "Cited message", draft: "Saved draft", save: "Source save", run: "Code run",
+      review: "Formal review", handoff: "Version handoff", share: "Room share",
+    };
+    const clock = (hour) => when(hour).slice(0, -3);
+    const level = (count) => count >= 10 ? 4 : count >= 5 ? 3 : count >= 2 ? 2 : count;
+    const recordCount = (count) => `${count} ${count === 1 ? "record" : "records"}`;
+
+    project.replaceChildren(...data.catalog.map(({ title, key }) => new Option(title, key)));
+    project.value = "audit";
+    project.disabled = false;
+    filter.append(...Object.entries(types).map(([key, label]) => new Option(label, key)));
+    filter.disabled = false;
+
+    function render() {
+      const { people, events } = data.timelines[project.value];
+      const selected = filter.value;
+      const visible = selected === "all" ? events : events.filter((event) => event.kind === selected);
+      const rows = new Map(people.map(({ name }) => [name, startTimes.map(() => [])]));
+      for (const event of visible) rows.get(event.person)[event.bin].push(event);
+      const withRecords = new Set(visible.map((event) => event.person)).size;
+      $("conversation-reading").textContent = `${recordCount(visible.length)} across ${withRecords} of ${people.length} documented agents.`;
+      $("timeline-example").hidden = project.value !== "audit" || selected !== "all";
+      $("conversation-project-link").dataset.projectLink = project.value;
+      $("timeline-detail-title").textContent = "Select a cell to see its records";
+      $("timeline-records").replaceChildren();
+
+      table.innerHTML = `<thead><tr><th scope="col">Agent</th>${startTimes.map((h) =>
+        `<th scope="col">${clock(h)}</th>`).join("")}<th scope="col">Total</th></tr></thead>
+        <tbody>${people.map(({ name, role, judge }, row) => {
+          const bins = rows.get(name);
+          const total = bins.reduce((sum, bin) => sum + bin.length, 0);
+          return `<tr><th scope="row">${escape(name)}${judge ? ' <span class="timeline-judge">Judge</span>' : ""}
+            ${role ? `<span class="timeline-role">${escape(role)}</span>` : ""}</th>
+            ${bins.map((bin, i) => {
+              const count = bin.length;
+              const label = `${name}, ${clock(startTimes[i])}, ${recordCount(count)}`;
+              return `<td>${count ? `<button type="button" data-row="${row}" data-bin="${i}" data-level="${level(count)}"
+                aria-label="${escape(label)}" aria-pressed="false">${count}</button>` : '<span data-level="0">0</span>'}</td>`;
+            }).join("")}<td class="timeline-total">${total}</td></tr>`;
+        }).join("")}</tbody>`;
+
+      table.onclick = (event) => {
+        const button = event.target.closest("button[data-bin]");
+        if (!button) return;
+        table.querySelector('[aria-pressed="true"]')?.setAttribute("aria-pressed", "false");
+        button.setAttribute("aria-pressed", "true");
+        const name = people[Number(button.dataset.row)].name;
+        const i = Number(button.dataset.bin);
+        const start = startTimes[i];
+        const end = Math.min(start + 0.5, data.activity.hours);
+        const records = rows.get(name)[i];
+        $("timeline-detail-title").textContent = `${name} · ${clock(start)}–${clock(end)} · ${recordCount(records.length)}`;
+        $("timeline-records").innerHTML = records.map((record) => {
+          const details = [labels[record.kind], record.entry, record.version == null ? "" : `v${record.version}`,
+            record.outcome].filter(Boolean).join(" · ");
+          return `<li><b>${when(record.h)}</b> ${escape(details)}</li>`;
+        }).join("");
+      };
+    }
+    project.addEventListener("change", render);
+    filter.addEventListener("change", render);
+    render();
+  }
+
+  setupContributionTimeline();
+
   // The explorer also works if the chart library is unavailable.
   if (!window.Charts) return;
   const C = window.Charts;
-  const $ = (id) => document.getElementById(id);
   const themes = [
     { name: "Scope of the work", count: data.conflict_topics.scope_requirement },
     { name: "What counted as evidence", count: data.conflict_topics.evidence_standard },
@@ -208,12 +291,6 @@
     C.register(render);
   }
 
-  setupTraces("conversation-project", "fig-project-conversation", "project-conversation-steps", data.traces.conversations, (path) => {
-    $("conversation-project-link").dataset.projectLink = path.project;
-    $("conversation-reading").textContent = path.featured
-      ? "Selected turns from the project’s recorded exchanges."
-      : "Linked conversations and dated milestones from the project record.";
-  });
   const replies = {
     accepted: "The proposal was accepted.", partly_accepted: "The proposal was partly accepted.",
     maintained: "The previous position was maintained.", rejected: "The proposal was declined.",

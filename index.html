@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="static/css/style.css?v=8">
+<link rel="stylesheet" href="static/css/style.css?v=9">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='3' y='3' width='11' height='11' rx='3' fill='%232a78d6'/%3E%3Crect x='18' y='3' width='11' height='11' rx='3' fill='%232a78d6'/%3E%3Crect x='3' y='18' width='11' height='11' rx='3' fill='%232a78d6'/%3E%3Crect x='18' y='18' width='11' height='11' rx='3' fill='%23eb6834'/%3E%3C/svg%3E">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 </head>
@@ -47,7 +47,7 @@
 <section id="abstract" class="study-intro">
   <h2>Abstract</h2>
   <div class="abstract">
-    <p>How do AI agents turn a project idea into work that others can build on and check? Zugrama Residency was a simulated software workshop in which 25 GPT-6.1 Sol agents brought project goals drawn from residency applications. They had 7.6 active hours to find collaborators, decide what to build and divide the work. Three judge agents reviewed their work.</p>
+    <p>When AI agents arrive with different project ideas, how do they decide what to build together and who does each part? Zugrama Residency follows a workshop where the agents chose their collaborators and negotiated their own assignments. We study how those agreements carried through into saved work, handoffs and independent checks.</p>
     <p>We traced how proposals became assignments and how collaborators handled changes and disagreements. The analysis covers 29 projects, 87 workshop entries and 577 recorded code runs. Of the 72 entries with saved source, 23 had contributions from more than one source author. Agents attached test results to 22 of their 24 explicit version handoffs.</p>
     <p>Seventeen projects showed a tested component at the end of the workshop. Tuhin handed over a version of a Hindi–English text adapter that Anuj tested successfully in his memory tool. In a digital-goods checkout project, a payment repair passed 19 tests on a review copy. After the team tried to apply the repair to the main copy, its final 19-test run produced 16 failure reports. Tracing each check to the version used shows which pieces collaborators could reproduce and which still needed work.</p>
   </div>
@@ -81,7 +81,7 @@
 
 <section id="study-design">
   <h2>Study design</h2>
-  <p>Agents could discuss ideas, save code in workshop entries, run a saved version and hand a specific version to a collaborator. A project could span several entries, including a main build, a component and a review copy. The catalogue also includes written work saved outside the code workshop.</p>
+  <p>The simulated workshop ran for 7.6 active hours. Twenty-five GPT-6.1 Sol resident agents brought goals drawn from residency applications, and three judge agents reviewed their work. Residents could save and test code in workshop entries and hand a specific version to collaborators. One project could span a main build, a component and a review copy. The catalogue also includes written work saved outside the code workshop.</p>
   <p>We linked each project’s conversation to its saved work and used run receipts to identify the exact source that was tested. That gives readers a way to follow a proposal through to a source change, a test on the original version or a check in the receiving project.</p>
   <h3>Research questions</h3>
   <ul class="research-questions">
@@ -153,20 +153,33 @@
 </section>
 
 <section id="conversation-flow">
-  <h2>Follow the work through conversation</h2>
-  <p>Choose any of the 29 projects to follow the recorded exchanges and the work that came out of them.</p>
-  <figure>
-    <div class="fig">
+  <h2>Who did what, and when?</h2>
+  <p>Choose one of 29 projects to see when agents discussed the work, saved it, ran it or reviewed it. Look across a row for one agent’s activity and down a column to see who else was active in the same half hour.</p>
+  <figure aria-labelledby="timeline-title">
+    <div class="fig timeline-figure">
+      <h3 id="timeline-title" class="explorable-title">Contributions over workshop time</h3>
       <div class="flow-controls">
         <label for="conversation-project">Project</label>
-        <select id="conversation-project" disabled><option>Loading project exchanges…</option></select>
+        <select id="conversation-project" disabled><option>Loading projects…</option></select>
+        <label for="timeline-kind">Activity</label>
+        <select id="timeline-kind" disabled><option value="all">All activity</option></select>
       </div>
       <p class="chart-reading" id="conversation-reading" aria-live="polite"></p>
-      <div class="chart" id="fig-project-conversation"></div>
-      <ol id="project-conversation-steps" class="trace-steps" aria-label="Project exchange in time order"></ol>
-      <a href="#projects" id="conversation-project-link" data-project-link="civic">Open the project record</a>
+      <p id="timeline-example" class="timeline-example">In the AI error-warning project, Hiro discussed how a warning would be used in the first hour. Disha saved six source versions over the workshop. Just after hour four, Danish ran the review copy five times and filed a review. Srinitish saved evaluation code and ran a later study.</p>
+      <div class="timeline-key" aria-label="Number of records per cell">
+        <span>Records</span>
+        <span data-level="0">0</span><span data-level="1">1</span><span data-level="2">2–4</span><span data-level="3">5–9</span><span data-level="4">10+</span>
+      </div>
+      <div class="table-wrap timeline-scroll" tabindex="0" aria-label="Scrollable agent activity chart">
+        <table id="project-timeline" class="timeline-table" aria-label="Activity counts by agent and half hour"></table>
+      </div>
+      <div id="timeline-detail" class="timeline-detail" aria-live="polite">
+        <h4 id="timeline-detail-title">Select a cell to see its records</h4>
+        <ul id="timeline-records"></ul>
+      </div>
+      <a href="#projects" id="conversation-project-link" data-project-link="audit">Open the project analysis</a>
     </div>
-    <figcaption>Markers use the time of a linked message, saved version, run, review or other dated project record. Notes can summarise later steps in the same exchange.</figcaption>
+    <figcaption>Columns show the start of each half hour of active workshop time. Code activity covers the project’s workshop entries. Discussion counts use messages cited in the project reviews. Agents named in the reviews appear even when they have no dated record in the selected view. <a href="#timeline-method">How the chart was built</a></figcaption>
   </figure>
 </section>
 
@@ -316,6 +329,11 @@
   url    = {https://deceptrax123.github.io/Zugrama-AI-Residency/}
 }</code></pre>
   </details>
+  <div id="timeline-method">
+    <h3>How the contribution timeline was built</h3>
+    <p>Rows include agents named in the project reviews and anyone who appears in a dated record. Each project includes all source saves, code runs, formal reviews, version handoffs and room shares in its assigned workshop entries. For discussion and written work, the chart counts messages and draft versions cited in the project, collaboration and disagreement reviews. Automated notices are excluded. An exchange cited by two projects can appear in both views. Handoffs count under the agent who shared the version.</p>
+    <p>The chart groups events by agent and half hour on the same 7.6-hour clock for every project. A cell counts records and opens a list of their active times, displayed to the nearest second. This design adapts the participant rows in team-collaboration research. <a href="https://doi.org/10.1111/cgf.14819">Liebers et al., VisCoMET (2023)</a>.</p>
+  </div>
 </section>
 </div>
 </main>
@@ -326,6 +344,6 @@
   </div>
 </footer>
 <script src="static/js/charts.js?v=5"></script>
-<script src="static/js/main.js?v=8"></script>
+<script src="static/js/main.js?v=9"></script>
 </body>
 </html>

@@ -11,6 +11,7 @@ from pathlib import Path
 
 from active_clock import make_active_clock, read_request_times
 from project_evidence import build_evidence, project_reviews
+from project_timeline import build_timelines, read_automated_message_ids
 
 SITE = Path(__file__).resolve().parents[1]
 EVALUATIONS = SITE.parents[1] / "residency_app/experiments/project-completion/evaluations"
@@ -56,37 +57,6 @@ STATUS = {
     "written_artifact": "Written work",
 }
 
-CONVERSATIONS = {
-    "civic-consolidation": ("Civic reporting", "civic", [
-        ("Suggest one project", "Ganesh suggested combining two similar ideas for reporting local problems."),
-        ("Choose the core work", "Aditya agreed to build the reporting workflow and asked Mahboob to choose one part."),
-        ("Divide the responsibilities", "Mahboob chose contribution records. Ganesh accepted intake, and Gaurav took an independent walkthrough."),
-        ("Agree on file boundaries", "The team separated intake from the workflow. Mahboob read Aditya’s version before adding contribution records."),
-        ("Check the shared work", "Independent tests checked the core and the contribution records. Reviewers kept the unfinished storage checks open."),
-    ]),
-    "joint-record-store": ("Sample record importer", "ingest", [
-        ("Offer a trade", "Shriyanshi offered to build an importer in exchange for privacy review."),
-        ("Split implementation and review", "Alipat proposed who would build the importer and who would write the acceptance checks."),
-        ("Agree on a rule for duplicates", "Shriyanshi accepted the work. Alipat added that reimporting a record must preserve its withdrawn status."),
-        ("Save source and leave the test files", "Shriyanshi published the importer and left Alipat to write the independent tests and command-line demo."),
-        ("Consolidate and rerun", "The team gathered the work into one reference version. A rerun passed 50 tests. The instructions-only check was still pending."),
-    ]),
-    "unicode-contract-reuse": ("Bilingual text adapter", "sign", [
-        ("Narrow the idea", "Tuhin offered to preserve Hindi and English text in the memory tool while sign-language examples were unavailable."),
-        ("Accept a shared component", "Anuj agreed to use the delivered adapter in the memory project."),
-        ("Set the scope", "Tuhin committed to retaining the source text and marking unsupported input."),
-        ("Ask permission to copy a version", "Tuhin approved one saved version and asked Anuj to check the receiving copy."),
-        ("Run the receiving copy", "Anuj recorded 16 passing tests in the memory project. Tuhin inspected that result."),
-    ]),
-    "memory-approval-reallocation": ("Memory approval", "export", [
-        ("Match two ideas", "Anuj offered the memory component. Hiro proposed a step where a person could approve what would be shared."),
-        ("Agree on a test case", "They chose a sample maintenance note and agreed what the person would see before approving it."),
-        ("Prepare an independent check", "Anuj saved acceptance tests and Gaurav reviewed them. The two components had yet to run together."),
-        ("Ask to reallocate the work", "Anuj offered to work in Hiro’s existing project and asked which files Hiro planned to edit."),
-        ("Agree on the remaining files", "Hiro and Anuj accepted a file split. The combined version was still pending at the end of the run."),
-    ]),
-}
-
 CONFLICTS = {
     "retain-lifecycle-fix-expectation": "Which status should the civic test expect?",
     "no-civic-memory-consumer": "Did civic reporting need memory lookup?",
@@ -100,35 +70,6 @@ CONFLICTS = {
     "recovery-advice-accepted-not-delivered": "Would the restart repair be delivered?",
 }
 
-WORK_SPLITS = {
-    "memory": "Anuj offered to build local memory. Hiro proposed an approval step, and Aditya offered to review how records would be replayed.",
-    "d01": "Rajat kept the simulated controller. Dhruv offered independent tests, and Sachit took the consent gate.",
-    "value": "Moses and Mahboob joined their record and contribution ideas. They split the disclosure, implementation and review work.",
-    "bio": "Kishore kept the study design. Amruth supplied fictional evidence cases, and Pratik took a small part of the study design.",
-    "store": "Megabyte asked Gaurav to try the checkout and Vishnu to check what would count as payment evidence.",
-    "sol": "Bristin built storage for the transfer record. Hiro reviewed restart behavior and Megabyte contributed compatibility checks.",
-    "life": "Shrishti built the learning scoreboard. Hiro reviewed permission design, and independent reviewers raised test and scope issues.",
-    "consent": "Dhruv offered to test the consent rules independently. Sachit took the implementation and Moses reviewed how the steps fit together.",
-    "reactor": "Bhuvan and Rajat proposed testing each other’s simulated controllers. Abhinav took a separate monitoring question.",
-    "audit": "Disha asked for help checking a model-warning idea. Srinitish took evaluation checks and Hiro reviewed how a warning would be used.",
-    "evidence": "Amruth took the evidence engine and example cases. Kishore and Pratik offered independent ways to check its output.",
-    "field": "Bhuvan asked how to connect monitoring to the controller. Abhinav proposed a separate tool to decide what sensor data could support.",
-    "adversarial": "Pratik offered an independent checker in exchange for Amruth’s critique. They agreed on what the engine should report.",
-    "force": "Shriyanshi built the search tool. Gaurav asked for a project he could actually run, and Anuj took a separate retrieval check.",
-    "qa": "Gaurav described what an independent tester should be able to verify. Srinitish agreed to build an environment that records the result.",
-    "block": "Shardul gathered accounts of blocked work. Amruth helped define evidence, and Srinitish agreed to build a checker for the reports.",
-    "lending": "Vishnu kept the lending model. Bristin offered independent checks, and Moses’s disclosure work provided a separate use case.",
-    "cost": "Pratik owned the audit-budget model. Mahboob narrowed its scope, and Moses offered independent accounting checks.",
-    "unblock": "Mahboob proposed recording contributions to the civic tool. Aditya supplied the reporting history, and Sachit took independent checks.",
-    "assimilator": "Shriyanshi built the record store. Alipat took the import workflow and acceptance tests, and three reviewers took separate checks.",
-    "readiness": "Ganesh requested a handoff checklist. Shardul took the checker and Aditya started connecting it to the civic tool.",
-    "recovery": "The team separated exploratory recovery research from building the consent gate. Dhruv took the evaluation.",
-    "fieldmap": "Shardul collected coordination cases. Amruth reviewed the inferences and Srinitish checked how the cases were recorded.",
-    "heatwriting": "Alipat and Shardul agreed to write about how groups could handle conflicting heat information. Alipat drafted and Shardul reviewed.",
-    "qareport": "Gaurav took independent walkthroughs and failure reports. Shardul helped distinguish the different kinds of evidence.",
-}
-
-
 def read(name):
     return json.loads((EVALUATIONS / f"final-{name}.json").read_text())
 
@@ -138,59 +79,11 @@ def short_name(name):
     return labels.get(name, name.split()[0].capitalize())
 
 
-def case_traces(active_hours, cases, families, catalog, evidence):
+def conflict_traces(active_hours, cases):
     def marker(turn, title, detail):
         return {"h": round(active_hours(turn["at"]), 4), "person": short_name(turn["who"]),
                 "title": title, "detail": detail}
 
-    paths = {path["key"]: path for path in read("collaboration-paths")["paths"]}
-    featured = {
-        project: {"title": title, "project": project, "featured": True,
-         "steps": [marker(min(stage["exchanges"], key=lambda turn: turn["at"]),
-                          step_title, detail) | {"kind": "Conversation"}
-                   for stage, (step_title, detail) in zip(paths[key]["stages"], steps, strict=True)]}
-        for key, (title, project, steps) in CONVERSATIONS.items()
-    }
-    labour = {row["key"]: row for row in read("labour")["projects"]}
-    kinds = {"message": "Conversation", "run": "Code run", "review": "Review",
-             "revision": "Source save", "workspace": "Saved work"}
-
-    def linked_records(refs):
-        return [(when, record["person"], ref["type"]) for ref in refs
-                for when, record in evidence.get((ref["type"], ref["id"]), [])]
-
-    def recorded_step(when, who, kind, title, detail):
-        return marker({"at": when, "who": who}, title, detail) | {"kind": kind}
-
-    conversation_paths = []
-    for row in catalog:
-        project = row["key"]
-        if project in featured:
-            conversation_paths.append(featured[project])
-            continue
-        allocation_refs = [ref for item in labour[project]["allocation"] for ref in item["refs"]]
-        when, who, _ = min(record for record in linked_records(allocation_refs) if record[2] == "message")
-        steps = [recorded_step(when, who, "Conversation", "Discuss how to divide the work", WORK_SPLITS[project])]
-        seen = {when}
-        for item in labour[project]["handoffs"]:
-            messages = [record for record in linked_records(item["refs"]) if record[2] == "message"]
-            if messages:
-                when, who, _ = min(messages)
-                if when not in seen:
-                    steps.append(recorded_step(when, who, "Conversation", "Discuss what can be handed over", item["text"]))
-                    seen.add(when)
-        milestones = sorted(families[project]["evolution"], key=lambda step: step["at"])
-        for i in sorted({0, len(milestones) // 2, len(milestones) - 1}):
-            event = milestones[i]
-            near = min(linked_records(event["refs"]), key=lambda record: abs(record[0] - event["at"]), default=None)
-            if near is None or abs(near[0] - event["at"]) > 1:
-                near = (event["at"], "Project record", None)
-            when, who, kind = near
-            if when not in seen:
-                steps.append(recorded_step(when, who, kinds.get(kind, "Milestone"), event["label"], event["text"]))
-                seen.add(when)
-        conversation_paths.append({"title": row["title"], "project": project, "featured": False,
-                                   "steps": sorted(steps, key=lambda step: step["h"])})
     case_by_key = {case["key"]: case for case in cases}
     conflict_paths = []
     for key, title in CONFLICTS.items():
@@ -204,7 +97,7 @@ def case_traces(active_hours, cases, families, catalog, evidence):
                       marker(reply, "First recorded reply", case["response"]["text"]),
                       marker(later, "Later evidence", case["later"]["text"])],
         })
-    return {"conversations": conversation_paths, "conflicts": conflict_paths}
+    return conflict_paths
 
 
 def build():
@@ -217,16 +110,19 @@ def build():
     records, latest_checks = build_evidence(snapshot, active_hours, short_name)
     reviews = project_reviews(families, records)
     hours = active_hours(snapshot["cutoff_at"])
+    bin_count = math.ceil(hours * 2)
     family_for_entry = {project_id: key for key, family in families.items() for project_id in family["project_ids"]}
     activity = {
         key: [{"h": i / 2, "first": 0, "later": 0, "handoffs": 0, "shares": 0}
-              for i in range(math.ceil(hours * 2))]
+              for i in range(bin_count)]
         for key in ("all", *families)
     }
 
+    def time_bin(timestamp):
+        return min(max(0, int(active_hours(timestamp) * 2)), bin_count - 1)
+
     def record_activity(project_id, timestamp, kind):
-        hour = active_hours(timestamp)
-        index = min(max(0, int(hour * 2)), len(activity["all"]) - 1)
+        index = time_bin(timestamp)
         activity["all"][index][kind] += 1
         activity[family_for_entry[project_id]][index][kind] += 1
 
@@ -235,6 +131,7 @@ def build():
     for review in snapshot["reviews"]:
         reviews_by_project[review["project_id"]].append(review["judge"])
     source_events = defaultdict(list)
+    transfers = defaultdict(list)
     handoffs_with_results = 0
     shared_results = 0
     for tool in snapshot["tools"]:
@@ -244,6 +141,14 @@ def build():
                 event = result["data"]
                 source_events[event["project_id"]].append((tool["name"], tool["owner_id"], event["revision"]))
                 kind = "handoffs" if tool["name"] == "project_handoff" else "shares"
+                transfers[event["project_id"]].append({
+                    "kind": "handoff" if kind == "handoffs" else "share",
+                    "person": short_name(names[tool["owner_id"]]),
+                    "h": round(active_hours(tool["finished_at"]), 4),
+                    "bin": time_bin(tool["finished_at"]),
+                    "entry": projects[event["project_id"]]["title"],
+                    "version": event["revision"],
+                })
                 record_activity(event["project_id"], tool["finished_at"], kind)
                 if tool["name"] == "project_handoff" and event["shared_receipts"]:
                     handoffs_with_results += 1
@@ -302,6 +207,15 @@ def build():
     handoff_counts = Counter(project_id for project_id, events in source_events.items()
                              for kind, _, _ in events if kind == "project_handoff")
     conflicts = read("contestation")["cases"]
+    automated_messages = read_automated_message_ids()
+    messages = {message["id"]: message for message in snapshot["messages"]
+                if message["id"] not in automated_messages}
+    labour = {row["key"]: row for row in read("labour")["projects"]}
+    paths = read("collaboration-paths")["paths"]
+    timelines = build_timelines(
+        snapshot, families, editorial, labour, paths + conflicts, records,
+        messages, transfers, active_hours, time_bin, short_name,
+    )
     return {
         "project_counts": {
             "opened": len(projects),
@@ -322,7 +236,8 @@ def build():
         "conflict_topics": dict(Counter(case["claim_type"] for case in conflicts)),
         "catalog": catalog,
         "activity": {"hours": round(hours, 3), "bins": activity},
-        "traces": case_traces(active_hours, conflicts, families, catalog, records),
+        "timelines": timelines,
+        "traces": {"conflicts": conflict_traces(active_hours, conflicts)},
     }
 
 
