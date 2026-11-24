@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Re-running Is Not Reviewing</title>
-<meta name="description" content="A log-level study of 25 GPT-6.1 Sol agents and 3 judge agents building software together for eight hours: team formation, verification, feedback and the cost of coordination.">
+<meta name="description" content="An audited, hypothesis-driven analysis of 25 GPT-6.1 Sol agents and 3 judge agents building software together: verification, feedback, division of work, project directions and the run's own failure points.">
 <meta property="og:title" content="Re-running Is Not Reviewing">
-<meta property="og:description" content="When 28 LLM agents built software together, peer re-runs almost never found bugs, new probes did, and specific feedback got acted on while 'needs evidence' mostly did not.">
+<meta property="og:description" content="28 LLM agents built software together for 7.6 active hours. Peer re-runs almost never found bugs, specific change requests were acted on while 'needs evidence' fell below the base rate, and building concentrated in a few hands.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
@@ -20,10 +20,15 @@
     <a class="brand" href="#top">Re-running Is Not Reviewing</a>
     <nav aria-label="Sections">
       <a href="#abstract">Abstract</a>
-      <a href="#setup">Setup</a>
-      <a href="#findings">Findings</a>
-      <a href="#prior">Prior audit</a>
-      <a href="#limits">Limitations</a>
+      <a href="#questions">Questions</a>
+      <a href="#methods">Methods</a>
+      <a href="#audit">Run audit</a>
+      <a href="#results">Results</a>
+      <a href="#labour">Division of work</a>
+      <a href="#directions">Directions</a>
+      <a href="#conversations">Conversations</a>
+      <a href="#tests">All tests</a>
+      <a href="#discussion">Discussion</a>
       <a href="#cite">Cite</a>
     </nav>
     <button class="theme-btn" type="button">Dark mode</button>
@@ -34,11 +39,12 @@
 <header class="hero wrap wide">
   <p class="venue">Agent Residency Studies · Study 2 of 2</p>
   <h1 class="title">Re-running Is Not Reviewing</h1>
-  <p class="subtitle">Team formation, verification and feedback among 28 LLM agents building software over eight hours</p>
+  <p class="subtitle">An audited analysis of verification, feedback and the division of work among 28 LLM agents building software</p>
   <p class="authors">Srinitish Srinivasan</p>
   <p class="affil">Agent Network Sandbox · November 2026</p>
   <div class="buttons">
     <a class="btn" href="https://github.com/Deceptrax123/Agent-network-sandbox-pilot"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>Sandbox code</a>
+    <a class="btn secondary" href="static/data/science.json" download>Test results (JSON)</a>
     <a class="btn secondary" href="static/data/projects.json" download>Figure data (JSON)</a>
     <a class="btn secondary" href="https://github.com/Deceptrax123/agent-project-study/tree/main/analysis">Analysis scripts</a>
     <a class="btn secondary" href="../agent-networking-study/">← Study 1: Networking</a>
@@ -48,10 +54,10 @@
 <div class="wrap wide">
   <figure>
     <div class="fig">
-      <div class="legend"><span><i style="background:var(--s1);border-radius:50%"></i>Resident (project owner)</span><span><i style="background:var(--s2);border-radius:50%"></i>Supplied judge</span></div>
+      <div class="legend"><span><i style="background:var(--s1);border-radius:50%"></i>Resident</span><span><i style="background:var(--s2);border-radius:50%"></i>Supplied judge</span></div>
       <div class="chart" id="fig-network"></div>
     </div>
-    <figcaption><b>Figure 1. Who worked with whom.</b> An edge joins two agents who both spoke in the same room. Edge width is the number of messages exchanged, and node size is messages sent. Unlike the full mesh in Study 1, residents form clusters. Only 82 of the 300 possible resident pairs ever shared a room. The three judges (orange) are the bridges between those clusters. Hover over a node to see its ties.</figcaption>
+    <figcaption><b>Figure 1. Who worked with whom.</b> An edge joins two agents who both wrote messages in the same room. Edge width is the number of messages exchanged, and node size is messages written. Unlike the full mesh in Study 1, residents form clusters: only 82 of the 300 possible resident pairs ever shared a room. The three judges and one self-appointed tester (Gaurav) are the bridges between clusters. Hover over a node to see its ties.</figcaption>
   </figure>
 </div>
 
@@ -59,186 +65,268 @@
 <section id="tldr">
   <h2>TL;DR</h2>
   <ul class="tldr">
-    <li><b>Re-running is not reviewing.</b> When a peer re-ran a command the builder had already run, it failed 3.8% of the time. When a peer wrote a <i>new</i> probe, it failed 14.2% of the time, 3.7× more often. Peers ran code 266 times on revisions the builder had already passed, and found only 6 failures.</li>
-    <li><b>Verification was handed to the judges.</b> The three supplied judges ran 73% of all peer executions. Residents checked each other's code only 93 times, though those checks found failures 2.3× as often.</li>
-    <li><b>Specific feedback gets acted on.</b> 88% of "changes requested" reviews were followed by a new revision, with a median lag of 2.7 minutes. Only 39% of "needs evidence" reviews were, after a median 20 minutes. Judges never once accepted a project.</li>
-    <li><b>The task created teams.</b> With the same model and many of the same personas as Study 1, 36% of rooms had 3–5 members and held 63% of all messages. Network modularity rose from 0.07 to 0.27.</li>
-    <li><b>Coordination is mostly reading.</b> 92% of the 22,146 tool calls read shared state. Over the run, the ratio of reads to executions rose from about 7:1 to about 45:1. The run cost $374, with an input-to-output token ratio of 80:1.</li>
+    <li><b>Re-running is not reviewing.</b> Peers ran code 266 times on revisions the builder had already passed, and only 6 runs failed (2.3%). Half of those failures were missing files. New probes failed more often than re-runs (14.2% vs 3.8%, Fisher p = 0.001). But when runs on the same project are treated as related, the confidence interval for the difference includes zero, so we call this suggestive rather than established.</li>
+    <li><b>The wording of a review predicts what happens next.</b> After a "changes requested" review, 82% of projects were revised within 30 minutes. After "needs evidence", only 23% were, which is <i>below</i> the 46% chance of a revision in any random 30-minute window on the same projects.</li>
+    <li><b>Building is concentrated; talking is not.</b> 49 of 72 projects with source were built by one agent. Revisions are more unequally spread than messages (Gini 0.28 vs 0.18, difference CI excludes zero), and peer testing is very concentrated (Gini 0.75). Two residents took on testing roles without being asked.</li>
+    <li><b>The work moves from exploring to improving.</b> In the first half hour every revision went to a new project. By the end almost all went to existing ones (trend z = −8.2). Requests to read source that had not been published yet also declined over the run (z = −7.2).</li>
+    <li><b>The audit changes the numbers.</b> 35% of "messages" in the record are receipts the platform posted under agents' names. Removing them lowers the talk–build correlation from 0.79 to 0.65. One agent's worker died at 3.0 active hours, removing it for 60% of the run. The prompt also told every agent the study's hypothesis.</li>
   </ul>
 </section>
 
 <section id="abstract">
   <h2>Abstract</h2>
   <div class="abstract">
-    <p>We seed 25 language-model agents (GPT-6.1 Sol, high reasoning) with project goals and skill summaries taken from real residency applications. We add three judge agents, each with an explicit remit (usefulness, technical correctness, delivery), and let the population self-organise for an eight-hour active budget. No teams or partners are assigned. Agents can talk in rooms of any size, publish versioned source to a shared workshop, execute it in a sandbox, hand components off and request review. The record contains 2,731 messages, 87 workshop entries, 209 source revisions, 577 sandboxed executions, 81 judge reviews and 22,146 tool calls.</p>
-    <p>An earlier automated audit (by GPT-6.1 Sol and GPT-6.2 Astra) traced curated cases of role negotiation, counterexample-driven repair and broken handoffs. We test those observations against the full execution and review log. Peer verification mostly <i>replicates</i> the builder's own checks and almost never surfaces new failures. Defects are found by novel probes and by handoff breakage. Verification concentrates in the supplied judges rather than spreading among peers. The judges' decision vocabulary matters: concrete change requests are acted on within minutes, while requests for "evidence" mostly are not. Compared with the open networking event run on the same model, the project framing turns a flat full mesh into a clustered, judge-bridged team structure, at the cost of a reading-dominated coordination overhead that grows over time.</p>
+    <p>We seed 25 language-model agents (GPT-6.1 Sol, high reasoning) with project goals and skill summaries taken from residency applications. We add three judge agents, each with an explicit remit, and let the population self-organise for 7.6 active hours. No teams or partners are assigned. Agents talk in rooms of any size, publish versioned source to a shared workshop, execute it in a sandbox and request review.</p>
+    <p>We first audit the run against its raw request/response log, usage ledger and tool log. The bookkeeping reconciles exactly, but the audit finds three problems:</p>
+    <ul>
+      <li>35% of chat messages are platform-generated receipts recorded under agent names;</li>
+      <li>one agent's worker died at 3.0 active hours and was never revived;</li>
+      <li>the system prompt disclosed the study's hypothesis to every agent.</li>
+    </ul>
+    <p>On the cleaned record (1,780 agent-written messages, 209 revisions, 577 executions, 81 reviews) we test 12 exploratory hypotheses with exact, resampling and stratified methods, adjusting for multiple comparisons. Four results stand out:</p>
+    <ul>
+      <li>Peer re-runs of passed code almost never fail. The apparent advantage of new probes is not robust once runs on the same project are treated as related.</li>
+      <li>The apparent difference between judges' and residents' checks disappears once check type is held fixed.</li>
+      <li>Concrete change requests are followed by revisions far more often than requests for evidence, which fall below a matched-time baseline.</li>
+      <li>Building is more concentrated than talking. Agents specialise into builders, contributors and testers, and the work shifts from starting projects to improving existing ones.</li>
+    </ul>
+    <p>We add data-selected conversation excerpts and a topic analysis showing that most agent talk is about process (evidence, receipts, handoffs, permissions) rather than about what is being built.</p>
   </div>
 </section>
 
-<section id="setup">
-  <h2>Experimental setup</h2>
+<section id="questions">
+  <h2>Research questions</h2>
+  <ol class="rq">
+    <li><b>Verification.</b><span>Which peer checks surface failures, and does it matter who runs them? (P1–P3)</span></li>
+    <li><b>Feedback.</b><span>Does the form of a judge's review predict whether the builder acts on it? (P4)</span></li>
+    <li><b>Division of work.</b><span>Do agents form teams and specialise? Is building concentrated? Is testing reciprocal? (P5–P8)</span></li>
+    <li><b>Directions.</b><span>How does the work move over time, and what do agents talk about? (P9, P11, topics, families)</span></li>
+    <li><b>Persona vs. setting.</b><span>Does an agent's activity in the networking study predict its activity here? (P10)</span></li>
+  </ol>
+  <p class="caveat">All hypotheses are exploratory. They were formulated after the earlier qualitative audit of this run, tested on the frozen logs and not pre-registered. Every test we ran is reported in <a href="#tests">the final table</a>, including the null results.</p>
+</section>
+
+<section id="methods">
+  <h2>Methods</h2>
   <div class="setup-grid">
-    <div class="case"><span class="pill">Population</span><h4>25 residents + 3 judges</h4><p>Residents were seeded with stated project goals, sourced skill summaries and proposed acceptance checks. Personality, politics and earlier simulation memories were deliberately excluded. All agents ran GPT-6.1 Sol with high reasoning.</p></div>
-    <div class="case"><span class="pill">Judges</span><h4>Three supplied remits</h4><p><b>Lou</b>: village usefulness and adoption. <b>Danish</b>: technical correctness, privacy and integration. <b>Guru</b>: delivery, scope and viability. Judges could rerun code on exact revisions and publish reviews.</p></div>
-    <div class="case"><span class="pill">Workshop</span><h4>Versioned code + sandbox</h4><p><code>project_create / write / run / handoff / share</code> on a shared workshop. Runs execute in a network-isolated Landlock/seccomp sandbox and return receipts bound to source hashes.</p></div>
-    <div class="case"><span class="pill">Organisation</span><h4>Nothing assigned</h4><p>No teams, partners or group sizes. Collaboration, milestones and reusable components were explicitly encouraged. Three candidate village needs were offered with simulated acceptance cases.</p></div>
-    <div class="case"><span class="pill">Clock</span><h4>7.6 active hours</h4><p>The active budget was 8 h per persona. The run stopped at 7 h 36 min. A 7-hour host pause splits the 14.8 h wall-clock record.</p></div>
-    <div class="case"><span class="pill">Record</span><h4>Frozen snapshot</h4><p>2,731 messages, 87 entries, 209 revisions, 577 executions, 81 reviews, 22,146 tool calls and $373.83 of API-equivalent spend.</p></div>
+    <div class="case"><span class="pill">Population</span><h4>25 residents + 3 judges</h4><p>Residents were seeded with stated goals, sourced skill summaries and proposed acceptance checks. The judges had fixed remits: <b>Lou</b> (village usefulness), <b>Danish</b> (technical correctness and privacy) and <b>Guru</b> (delivery and scope). All agents ran GPT-6.1 Sol with high reasoning.</p></div>
+    <div class="case"><span class="pill">Workshop</span><h4>Versioned code + sandbox</h4><p>Agents could create, write, run, hand off and share projects. Runs execute in a network-isolated sandbox and return receipts bound to source hashes. A round-robin scheduler gave each agent about 275 model calls.</p></div>
+    <div class="case"><span class="pill">Clock</span><h4>7.6 active hours</h4><p>One operator pause of 7.2 h is removed from every time axis. "Hours" on this page means active hours.</p></div>
   </div>
   <div class="stats" id="run-stats"></div>
+  <dl class="methods">
+    <dt>Inclusion</dt>
+    <dd>We include agent-written messages only. Of 2,731 messages in the record, 951 were posted by the platform under an agent's name: 433 execution receipts, 311 revision notices, 71 review notices and 136 workspace or whiteboard publications. All executions, revisions and reviews are included.</dd>
+    <dt>Measures</dt>
+    <dd>
+      <ul>
+        <li><i>Self run</i>: an execution by the project's creator.</li>
+        <li><i>Peer replication</i>: a non-creator runs a command string already run on that project.</li>
+        <li><i>Peer new probe</i>: a non-creator runs a command never run on that project before.</li>
+        <li><i>Failure</i>: a non-zero exit or <code>ok: false</code>.</li>
+        <li><i>Acted on</i>: a new revision of the project within 30 active minutes of a review.</li>
+        <li><i>Role profile</i>: each agent's counts of own-project revisions, revisions to others' projects, self runs, peer runs, messages and reviews. The agent's archetype is the role whose share most exceeds the resident average.</li>
+      </ul>
+    </dd>
+    <dt>Statistics</dt>
+    <dd>
+      <ul>
+        <li>Wilson intervals for proportions.</li>
+        <li>Fisher's exact test with Woolf intervals on odds ratios.</li>
+        <li>A cluster bootstrap over projects (3,000 resamples) for verification differences.</li>
+        <li>A Mantel–Haenszel pooled odds ratio stratified by check type.</li>
+        <li>A matched-time null for review follow-through: 40 random time points per reviewed project, drawn within that project's active life.</li>
+        <li>A directed configuration null (2,000 draws) for reciprocal testing.</li>
+        <li>An agent-level bootstrap for Gini coefficients and Spearman correlations.</li>
+        <li>Cochran–Armitage tests for trends over active hours.</li>
+      </ul>
+      Benjamini–Hochberg adjustment across the 8 tests that produce a p-value.</dd>
+    <dt>Reproducibility</dt>
+    <dd><code>analysis/build_data.py</code> builds the descriptive figures and <code>analysis/science.py</code> builds the audit, tests, division of work, topics and conversation selection. Both read the frozen sources only. Seeds are fixed, and no resident code is executed.</dd>
+  </dl>
 </section>
 
-<section id="findings">
-  <h2>Findings</h2>
+<section id="audit">
+  <h2>Run audit</h2>
+  <p>We checked whether the run happened as designed by comparing four sources: the scheduler (when each agent was called), the raw model requests and responses, the usage ledger and the platform's records of messages, tools and projects. The operator pause is ignored by design; the run was resumed on the same clock.</p>
+  <figure>
+    <div class="fig">
+      <p class="chart-title">Model calls per agent over active time</p>
+      <div class="legend"><span><i style="background:var(--s1)"></i>model call</span><span><i style="background:var(--s2)"></i>not scheduled (&gt; 20 active min)</span></div>
+      <div class="chart" id="fig-lanes"></div>
+    </div>
+    <figcaption><b>Figure 2. The run as the scheduler saw it.</b> Round-robin scheduling gave 27 agents 271–282 calls each. Abhinav's worker stopped at 3.0 active hours and made one more call after the pause, so the agent was absent for 4.6 of 7.6 hours. Hover over a row for details.</figcaption>
+  </figure>
+  <div class="audit-grid" id="audit-items"></div>
+  <figure>
+    <div class="fig"><div class="table-wrap"><table class="compare" id="tbl-audit"></table></div></div>
+    <figcaption><b>Table 1. Integrity checks.</b> Token counts in the raw responses match the ledger exactly. Every call without a recorded cost is a provider error.</figcaption>
+  </figure>
+  <div class="prior"><span class="tag">Corrects earlier numbers</span>Our first draft and the earlier automated audit counted all 2,731 chat messages as agent talk. Excluding the 951 platform receipts changes several results:</div>
+  <ul>
+    <li>Median words per message: 47 → 55.</li>
+    <li>Judges' message counts: 171–204 → 116–142.</li>
+    <li>Talk–build correlation: 0.79 → 0.65.</li>
+    <li>Cross-setting correlation: −0.36 → −0.46.</li>
+  </ul>
+  <p>All numbers on this page use the corrected record.</p>
+  <p class="caveat"><b>Demand characteristics.</b> Every system prompt began: <i id="aim"></i> It also told agents to "distinguish a proposed approach, a draft artifact, a tested artifact and externally validated completion" and to "preserve failures". The evidence-heavy vocabulary we observe (receipts, scopes, "not human adoption evidence") is at least partly an instruction-following effect.</p>
+</section>
 
-  <article class="finding" id="f1">
-    <div class="f-label">Finding 1 · Verification</div>
-    <p class="claim">Peer verification mostly re-runs the builder's own checks, and those re-runs almost never find anything.</p>
-    <p>We label each of the 577 executions by who ran it and what command it ran. A <i>replication</i> is a peer running a command that had already been run on that project. A <i>new probe</i> is a peer running a command nobody had run before. Builders' own runs fail 18.9% of the time, because they are still developing. Peer replications fail 3.8% of the time. New probes fail 14.2% of the time. Of the 266 peer executions on a revision the builder had already passed, only 6 failed. Three of those six were missing files or modules, which means the handoff broke, not the logic. The other three were real defects: an evidence validator that accepted an uninspected execution claim, a readiness checker that broke on an unexpected <code>schema_version</code> type, and a CLI that rejected a destination its own interface promised.</p>
+<section id="results">
+  <h2>Results</h2>
+
+  <article class="finding" id="rq1">
+    <div class="f-label">RQ1 · Verification</div>
+    <p class="claim">Peer re-runs of code that already passes almost never fail. New probes look better, but the evidence for that is not robust.</p>
+    <p>We labelled each of the 577 executions by who ran it and what it ran. Builders' own runs fail 18.9% of the time, because they are still developing. Peer replications fail 3.8% of the time and peer new probes 14.2%. Fisher's test on these counts is significant (OR 4.2). But runs are not independent: the same project is checked many times. When we resample whole projects, the 95% interval for the difference runs from −1.8 to +17.2 points. The cleanest estimate is the descriptive one: only 6 of 266 peer runs on a revision the builder had already passed failed, and 3 of those 6 were missing files.</p>
+    <div class="stat-line" id="sl-p1"></div>
     <figure>
       <div class="fig">
-        <p class="chart-title">Execution failure rate by who ran it and what they ran</p>
+        <p class="chart-title">Share of executions that failed, with 95% Wilson intervals</p>
         <div class="chart" id="fig-verify"></div>
       </div>
-      <figcaption><b>Figure 2. Where failures surface.</b> A failure means the run returned a non-zero exit or <code>ok: false</code>. Hover for counts and how many failures were missing files or modules. "Peer" means any agent other than the project's creator, judges included.</figcaption>
+      <figcaption><b>Figure 3. Where failures surface.</b> "Peer" means any agent other than the project's creator, judges included. Hover for counts and how many failures were missing files.</figcaption>
     </figure>
-    <div class="prior"><span class="tag">Quantifies prior audit</span>The audit showed eight selected "objection → change → rerun" cases and warned that they were "not a prevalence estimate". The full log gives the prevalence. Most of the 344 peer executions were confirmation, not challenge. Executions that found defects were rare, and they almost always involved a check nobody had written before.</div>
-    <p class="caveat">A replication can still be useful: it is independent evidence that a result reproduces. But a dashboard that counts "independently verified" runs would credit 238 replications that tested nothing new.</p>
-  </article>
-
-  <article class="finding" id="f2">
-    <div class="f-label">Finding 2 · Who verifies</div>
-    <p class="claim">Verification went to the supplied judges. Residents rarely checked each other's code, though their checks found more.</p>
-    <p>Judges ran 251 of the 344 peer executions (73%). Residents ran 93, roughly 4 each across 25 agents. Resident peer runs failed 11.8% of the time against 5.2% for judges, and over half of them (50 of 93) were new probes. The judges were also the most talkative members of the run (171–204 messages each). Together with one resident, they have the highest betweenness in the collaboration network.</p>
+    <p>Do residents check better than judges? Resident peer runs failed 11.8% of the time against 5.2% for judges (crude OR 2.5, p = 0.053). But residents wrote new probes for 54% of their checks and judges for 22%. Holding check type fixed, the pooled odds ratio falls to 1.6 (95% CI 0.70–3.65). The role difference is explained by <i>what</i> was run, not <i>who</i> ran it.</p>
+    <div class="stat-line" id="sl-p3"></div>
     <figure>
       <div class="fig">
-        <p class="chart-title">Peer executions by runner role</p>
+        <p class="chart-title">Failure rate by runner role and check type</p>
         <div class="chart" id="fig-verify-role"></div>
       </div>
-      <figcaption><b>Figure 3. Supplied versus emergent verification.</b> Each bar splits into replications and new probes. Judges re-ran far more. Residents probed proportionally more.</figcaption>
+      <figcaption><b>Figure 4. Stratifying by check type removes the role effect.</b> Judges ran 251 of the 344 peer executions, mostly replications.</figcaption>
     </figure>
   </article>
 
-  <article class="finding" id="f3">
-    <div class="f-label">Finding 3 · Feedback</div>
-    <p class="claim">Specific change requests get acted on within minutes. "Needs evidence" mostly does not.</p>
-    <p>The judges published 81 reviews of 29 projects, with a median of 87 words each. None accepted a project. 62 asked for more evidence, 17 requested specific changes, and 2 called a simulation demo-ready. 15 of 17 change requests (88%) were followed by a new revision of that project, with a median lag of 2.7 minutes. Only 24 of 62 "needs evidence" reviews (39%) were, with a median lag of 19.9 minutes. All three judges used "needs evidence" as their default, whatever their remit.</p>
+  <article class="finding" id="rq2">
+    <div class="f-label">RQ2 · Feedback</div>
+    <p class="claim">Builders act on change requests they can carry out. "Needs evidence" is followed by less revision than a random moment.</p>
+    <p>The judges published 81 reviews of 29 projects and accepted none: 62 said "needs evidence", 17 said "changes requested" and 2 said "demo ready". After "changes requested", 82% of projects were revised within 30 active minutes. After "needs evidence", 23% were. That raw gap could just reflect projects that were about to be revised anyway, so we drew 40 random moments in each reviewed project's active life and asked the same question. The baseline is 46%. Change requests sit well above it. "Needs evidence" sits below it: the builder, it seems, is more often off gathering what was asked for than revising code.</p>
+    <div class="stat-line" id="sl-p4"></div>
     <figure>
       <div class="fig fig-row">
-        <div><p class="chart-title">Review decisions by judge</p>
-          <div class="legend"><span><i style="background:var(--s1)"></i>Needs evidence</span><span><i style="background:var(--s2)"></i>Changes requested</span><span><i style="background:var(--s3)"></i>Demo ready</span></div>
-          <div class="chart" id="fig-judges"></div></div>
-        <div><p class="chart-title">Reviews followed by a new revision</p><p class="chart-sub">share of reviews of each type</p><div class="chart" id="fig-follow"></div></div>
+        <div><p class="chart-title">Revised within 30 minutes of …</p><p class="chart-sub">share with 95% Wilson interval</p><div class="chart" id="fig-follow"></div></div>
+        <div><p class="chart-title">Time to the next revision</p><p class="chart-sub">cumulative share of reviews, active minutes</p><div class="legend"><span><i class="line" style="background:var(--s2)"></i>Changes requested</span><span><i class="line" style="background:var(--s1)"></i>Needs evidence</span></div><div class="chart" id="fig-curves"></div></div>
       </div>
-      <figcaption><b>Figure 4. Review vocabulary and follow-through.</b> A review counts as followed if the project gained any later revision. This is observational: "needs evidence" was more often issued on projects that were already finished or blocked by external requirements.</figcaption>
-    </figure>
-    <div class="prior"><span class="tag">New</span>The audit described judges' remits and quoted reviews. It did not measure what reviews led to. For anyone designing evaluator agents, the takeaway is that a <i>request</i> the builder can execute is acted on. A <i>standard</i> the builder has to interpret mostly is not.</div>
-  </article>
-
-  <article class="finding" id="f4">
-    <div class="f-label">Finding 4 · Team formation</div>
-    <p class="claim">The same model that kept strictly to one-to-one chats while networking forms clustered teams once it has projects.</p>
-    <p>In Study 1 every one of 207 rooms stayed a dyad, even with groups explicitly allowed. Here 37 of 103 rooms grew to 3–5 active members, and those rooms carry 63% of all messages. Instead of a full mesh (density 0.95), residents link to a few collaborators: 82 of 300 resident pairs ever share a room. Modularity is 0.27, against 0.07 while networking. Messages are shorter (median 47 words vs 105) and replies faster (median 71 s vs 132 s).</p>
-    <figure>
-      <div class="fig">
-        <p class="chart-title">Share of messages by room size</p>
-        <div class="legend"><span><i style="background:var(--s1)"></i>Projects (this study)</span><span><i style="background:var(--s2)"></i>Networking (Study 1, Run 3)</span></div>
-        <div class="chart" id="fig-roomsize"></div>
-      </div>
-      <figcaption><b>Figure 5. Group size depends on the task.</b> Room size counts the active participants who sent at least one message.</figcaption>
-    </figure>
-    <div class="prior"><span class="tag">Extends prior audit</span>The audit documented groups forming through specific requests and negotiated roles. The cross-study comparison sharpens that: group formation is not a fixed property of the model. A shared artifact gives agents a reason to add a third person, and open-ended socialising did not.</div>
-  </article>
-
-  <article class="finding" id="f5">
-    <div class="f-label">Finding 5 · Coordination cost</div>
-    <p class="claim">Agents spend their fixed action budget reading shared state, and the reading share grows as the work does.</p>
-    <p>Every agent but one made 760–835 tool calls (Abhinav made 266), so effort was effectively fixed. What differed was how they spent it. 92% of calls read state: project files (14,582), workspaces (3,117), conversation memory (1,372) and execution receipts (1,279). Only 2.5% wrote or published anything, and 2.7% executed code. The read:execute ratio rose from about 7:1 in the first half hour to about 45:1 by the end of the first session, and ran between 25:1 and 50:1 after the pause. 1,020 project reads failed, typically requests for paths or revisions the agent could not see.</p>
-    <figure>
-      <div class="fig">
-        <p class="chart-title">Tool calls per agent, by kind</p>
-        <div class="legend"><span><i style="background:var(--s1)"></i>Read state</span><span><i style="background:var(--s2)"></i>Write / publish</span><span><i style="background:var(--s3)"></i>Execute</span><span><i style="background:var(--s4)"></i>Web</span><span><i style="background:var(--s5)"></i>Judge review</span></div>
-        <div class="chart" id="fig-tools"></div>
-      </div>
-      <figcaption><b>Figure 6. A fixed budget, spent mostly on reading.</b> Residents first, sorted by total calls, then the three judges.</figcaption>
+      <figcaption><b>Figure 5. Review wording and follow-through.</b> <i>Left</i>: the dashed line marks the matched random-time baseline. <i>Right</i>: the share of reviews that had been followed by a revision, as time passes. Curves end at the share of reviews ever followed by a revision.</figcaption>
     </figure>
     <figure>
       <div class="fig">
-        <p class="chart-title">Read calls per execution, per half hour of wall-clock time</p>
-        <div class="chart" id="fig-ratio"></div>
+        <p class="chart-title">Review decisions by judge</p>
+        <div class="legend"><span><i style="background:var(--s1)"></i>Needs evidence</span><span><i style="background:var(--s2)"></i>Changes requested</span><span><i style="background:var(--s3)"></i>Demo ready</span></div>
+        <div class="chart" id="fig-judges"></div>
       </div>
-      <figcaption><b>Figure 7. Coordination overhead grows.</b> The 7-hour host pause (wall-clock 4–11 h) is collapsed. The shaded bins come after the resume. Bins with fewer than 10 executions (at each session edge) are omitted.</figcaption>
+      <figcaption><b>Figure 6.</b> All three judges defaulted to "needs evidence", whatever their remit.</figcaption>
     </figure>
   </article>
+</section>
 
-  <article class="finding" id="f6">
-    <div class="f-label">Finding 6 · Talk and build</div>
-    <p class="claim">There are no talkers and builders. The agents who talk most also build most.</p>
-    <p>Across the 25 residents, messages sent correlate strongly with source revisions authored (Spearman ρ = 0.79) and with executions run (ρ = 0.85). The one clear exception is informative. Gaurav, the most talkative resident (198 messages), authored only 5 revisions but ran the most executions (44): a self-selected tester role. The quietest residents wrote almost no code. Conversation here works as part of the building process, not a substitute for it.</p>
+<section id="labour">
+  <h2>Division of work</h2>
+  <article class="finding" id="rq3">
+    <div class="f-label">RQ3 · Teams, specialisation and concentration</div>
+    <p class="claim">Agents formed teams, but building stayed in few hands. A handful of agents became testers without being asked.</p>
+    <p>The same model that kept strictly to one-to-one chats while networking formed rooms of 3–5 here: 37 of 103 rooms, holding 62% of agent-written messages. Within those teams, though, the work was not shared evenly:</p>
+    <ul>
+      <li><b>Mostly solo projects.</b> 49 of the 72 projects that received source (68%) were built by one agent, and only 23 had more than one author.</li>
+      <li><b>Building is concentrated.</b> Revisions are more unequally spread than messages (Gini 0.28 vs 0.18; the bootstrap interval for the difference excludes zero).</li>
+      <li><b>Testing is more concentrated still.</b> Peer test runs by residents have a Gini of 0.75. Gaurav and Megabyte alone ran 57 of the 93 resident peer checks.</li>
+    </ul>
+    <p>Classifying each agent by the role it did more of than the average resident gives 12 builders, 8 contributors (who revised others' projects), 2 testers and 3 talkers, plus the 3 judges.</p>
+    <p>Do agents return the favour of testing? Among resident tester → owner links, 6% are reciprocated, against 2% expected by chance with the same in- and out-degrees (p = 0.28). That is no evidence of reciprocal testing. Agents who talk more also build more (ρ = 0.65). Every agent had the same budget of calls, so this is a trade-off within that budget: the quietest agents spent their calls reading.</p>
+    <div class="stat-line" id="sl-p6"></div>
     <figure>
       <div class="fig">
-        <p class="chart-title">Messages sent vs source revisions authored (residents)</p>
-        <p class="chart-sub">dot size = executions run</p>
-        <div class="chart" id="fig-talkbuild"></div>
+        <p class="chart-title">Each agent's activity mix</p>
+        <p class="chart-sub">share of the agent's own actions in each role · grouped by archetype</p>
+        <div class="chart" id="fig-roles"></div>
       </div>
-      <figcaption><b>Figure 8. Talk and build go together</b> (n = 25). Hover for each agent's executions and spend.</figcaption>
+      <figcaption><b>Figure 7. Emergent roles.</b> "Build own" = revisions to projects the agent created. "Build others'" = revisions to someone else's project. "Test own/others'" = executions. "Talk" = agent-written messages. "Review" = judge reviews. Rows are grouped by archetype. Hover a cell for counts.</figcaption>
     </figure>
-  </article>
-
-  <article class="finding" id="f7">
-    <div class="f-label">Finding 7 · Project lifecycle</div>
-    <p class="claim">Most projects reached a passing run quickly. Many were never touched again.</p>
-    <p>Of 87 workshop entries, 15 never received source and 18 were never executed. Among the 68 entries that passed at least once, the median time from creation to first pass was 13 minutes. 73% of first runs on a new revision passed. 35 of 209 revisions (17%) were authored by someone other than the project creator. The retrospective classification of the 29 project families counts 17 working components, 5 incomplete, 3 written artifacts, 2 with failing tests and 2 negative results.</p>
     <figure>
       <div class="fig fig-row">
-        <div><p class="chart-title">Revisions per workshop entry</p><div class="chart" id="fig-revs"></div></div>
-        <div><p class="chart-title">Minutes from creation to first passing run</p><p class="chart-sub">68 entries · median 13 min · log scale</p><div class="chart" id="fig-ttg"></div></div>
+        <div><p class="chart-title">How concentrated is each kind of work?</p><p class="chart-sub">Lorenz curves over the 25 residents</p><div class="legend"><span><i class="line" style="background:var(--s1)"></i>Messages</span><span><i class="line" style="background:var(--s3)"></i>Revisions</span><span><i class="line" style="background:var(--s2)"></i>Peer test runs</span></div><div class="chart" id="fig-lorenz"></div></div>
+        <div><p class="chart-title">Distinct authors per project</p><p class="chart-sub">72 projects with source</p><div class="chart" id="fig-builders"></div></div>
       </div>
-      <figcaption><b>Figure 9. Fast first passes, shallow iteration.</b> Most entries stop at one or two revisions. A long tail, up to 15 revisions, belongs to shared components.</figcaption>
+      <figcaption><b>Figure 8. Concentration.</b> <i>Left</i>: the further a curve sags below the diagonal, the more the work is concentrated in a few agents. <i>Right</i>: most projects had a single author.</figcaption>
+    </figure>
+    <figure>
+      <div class="fig fig-row">
+        <div><p class="chart-title">Share of agent-written messages by room size</p><div class="legend"><span><i style="background:var(--s1)"></i>Projects</span><span><i style="background:var(--s2)"></i>Networking (Study 1)</span></div><div class="chart" id="fig-roomsize"></div></div>
+        <div><p class="chart-title">Messages vs revisions (residents)</p><p class="chart-sub">dot size = peer test runs</p><div class="chart" id="fig-talkbuild"></div></div>
+      </div>
+      <figcaption><b>Figure 9.</b> <i>Left</i>: the task produced teams where networking produced none. <i>Right</i>: talk and build go together (ρ = 0.65, 95% CI 0.29–0.86).</figcaption>
+    </figure>
+  </article>
+</section>
+
+<section id="directions">
+  <h2>Directions: where the work went</h2>
+  <article class="finding" id="rq4">
+    <div class="f-label">RQ4 · From exploring to improving</div>
+    <p class="claim">Agents started many projects early, then shifted to improving a few. Talk was mostly about process, not product.</p>
+    <p><b>Explore, then exploit.</b> 47 of 87 projects were created in the first active hour. In the first half hour every revision went to a project less than 30 minutes old. By hour 5, almost every revision went to an established one (Cochran–Armitage z = −8.2). The shift is gradual and continues through the run, not a single switch.</p>
+    <p><b>Fewer premature reads.</b> Agents learned to stop requesting unpublished work. 793 of 14,582 project reads were refused because the source had not been published yet. The refusal share fell from 6–8% in the first four hours to 3–5% afterwards (z = −7.2).</p>
+    <div class="stat-line" id="sl-p11"></div>
+    <figure>
+      <div class="fig fig-row">
+        <div><p class="chart-title">Revisions per half hour</p><div class="legend"><span><i style="background:var(--s4)"></i>to projects &lt; 30 min old</span><span><i style="background:var(--s1)"></i>to older projects</span></div><div class="chart" id="fig-explore"></div></div>
+        <div><p class="chart-title">Reads refused: source not published yet</p><p class="chart-sub">share of project reads, per active hour</p><div class="chart" id="fig-premature"></div></div>
+      </div>
+      <figcaption><b>Figure 10. Direction of effort over active time.</b></figcaption>
+    </figure>
+    <p><b>Talk is mostly about process.</b> A topic model of the 1,780 agent-written messages finds eight themes. All but one concern process rather than domain: human evidence and instructions, independent passes and receipts, failures and packaging, attribution and permission to copy, source handoffs, judge scope and authorising releases. Even the exception, integration and interfaces, is about how components fit together, not what they do. The village problems the agents were building for (water reporting, tool sharing, offline knowledge) barely surface as vocabulary. This fits the disclosed aim and the evidence-focused prompt noted in the audit.</p>
+    <figure>
+      <div class="fig">
+        <p class="chart-title">Share of messages per topic, per active hour</p>
+        <div class="chart" id="fig-topics"></div>
+      </div>
+      <figcaption><b>Figure 11. What agents talked about.</b> TF-IDF + NMF with k = 8 and seed 1. Labels are assigned by keyword rules from each component's top terms, which are shown under each title.</figcaption>
     </figure>
     <figure>
       <div class="fig">
-        <p class="chart-title">Final classification of the 29 project families (prior audit)</p>
+        <p class="chart-title">Where the 29 project families ended (earlier audit's classification)</p>
         <div class="chart" id="fig-outcomes"></div>
       </div>
-      <figcaption><b>Figure 10. Outcomes.</b> From the earlier audit's retrospective review. A "working component" is a tested bounded piece, not a completed original project.</figcaption>
+      <figcaption><b>Figure 12. Outcomes.</b> From the earlier audit's retrospective review. A "working component" is a tested, bounded piece, not a completed original project.</figcaption>
     </figure>
-  </article>
-
-  <article class="finding" id="f8">
-    <div class="f-label">Finding 8 · Persona vs. setting</div>
-    <p class="claim">An agent's activity in one setting does not predict its activity in the other.</p>
-    <p>Fifteen residents appear in both studies with matching personas. Their message counts while networking and while building projects are uncorrelated, even slightly negative (Spearman ρ = −0.36, p = 0.20). The most active networkers were not the most active builders. Together with Study 1's finding that activity is not stable across reruns, this suggests that how much an agent participates depends on the task and the run, not on the persona.</p>
+    <p><b>Persona vs. setting.</b> For the 15 residents who appear in both studies, messages written while networking and while building are not positively related (ρ = −0.46, 95% CI −0.84 to 0.16, p = 0.09). How much an agent participates seems to depend on the task, not the persona.</p>
     <figure>
-      <div class="fig">
-        <p class="chart-title">Messages sent: networking (Study 1, Run 3) vs projects</p>
-        <div class="chart" id="fig-cross"></div>
-      </div>
-      <figcaption><b>Figure 11. Same personas, different settings</b> (n = 15 residents; judges excluded because their role changed).</figcaption>
+      <div class="fig"><p class="chart-title">Messages: networking (Study 1, Run 3) vs projects</p><div class="chart" id="fig-cross"></div></div>
+      <figcaption><b>Figure 13. Same personas, different settings</b> (n = 15 residents; judges excluded because their role changed).</figcaption>
     </figure>
   </article>
 </section>
 
-<section id="agents">
-  <h2>Per-agent record</h2>
-  <p>Sortable. Spend is the API-equivalent estimate from the run's usage ledger.</p>
-  <div id="tbl-agents"></div>
+<section id="conversations">
+  <h2>Interesting conversations</h2>
+  <p>We chose these conversations by rule, so they can be reproduced, and each card states its rule. Quoted turns are the first 60 words of the original message, with "…" where we cut. They complement the earlier audit's ten hand-picked highlights. Agents are simulated personas, and their words are not the views of the people they represent.</p>
+  <div class="convos" id="convos"></div>
 </section>
 
-<section id="prior">
-  <h2>The earlier audit's findings, re-checked</h2>
-  <p>The automated audit (GPT-6.1 Sol and GPT-6.2 Astra) reported eight findings, each backed by curated, source-linked cases. We place each one against the full-log measurements.</p>
+<section id="tests">
+  <h2>All hypothesis tests</h2>
+  <p>Every test we ran is listed below, including the null results. "Supported" means the BH-adjusted p is below 0.05 and the effect goes in the stated direction. "Estimate" rows report an interval without a null hypothesis.</p>
+  <div id="tbl-tests"></div>
+</section>
+
+<section id="discussion">
+  <h2>Discussion</h2>
+  <p><b>Measure checks by what they could have found.</b> A dashboard that counts "independently verified" runs would credit 238 replications that tested nothing new. Re-runs confirm reproducibility, not correctness. Where peers did find failures, they mostly found packaging defects and missing files, the seams between agents, rather than logic errors.</p>
+  <p><b>Evaluator agents should ask for things that can be done.</b> A request the builder can carry out is acted on. A standard the builder has to interpret is followed by less revision than a random moment. This is observational, since judges chose their wording per project, but it suggests a direct experiment, listed below.</p>
+  <p><b>Self-organisation produced specialists, not collectives.</b> Agents formed teams to talk, but most projects kept a single author. Testing became a job for two volunteers and three judges rather than a shared norm, and testing was not reciprocated.</p>
+  <p><b>Audit before you analyse.</b> Platform receipts in the chat stream, a silently dead worker and a prompt that disclosed the hypothesis each changed or qualified a headline number. None of them was visible in the summary statistics.</p>
+  <div class="prior"><span class="tag">Relation to the earlier audit</span>The earlier automated audit (GPT-6.1 Sol and GPT-6.2 Astra) traced curated cases of role negotiation, counterexample-driven repair and broken handoffs. Those cases remain accurate. This study adds three things: prevalence estimates with intervals, tests that remove two apparent effects (role, and to a degree probe type), and corrected message-level statistics.</div>
   <div class="table-wrap"><table class="compare">
-    <thead><tr><th>Prior finding</th><th>Status</th><th>What the full log adds</th></tr></thead>
+    <thead><tr><th>Earlier finding</th><th>Status</th><th>What the audited log adds</th></tr></thead>
     <tbody>
-      <tr><td>Groups formed through specific requests and negotiated roles</td><td>Confirmed</td><td>The task produces groups (37 rooms of 3–5) where networking produced none (Fig. 5).</td></tr>
-      <tr><td>Division of work became concrete at interfaces</td><td>Confirmed</td><td>17% of revisions are cross-author. Talk and build are tightly coupled (Fig. 8).</td></tr>
-      <tr><td>Concrete counterexamples changed code, and sometimes the test</td><td>Refined</td><td>Real, but rare. They come from new probes (14% fail), not replications (4%) (Fig. 2).</td></tr>
-      <tr><td>Passing components did not guarantee handoff or integration</td><td>Confirmed</td><td>Half of the failures found after a builder's pass were missing files or modules.</td></tr>
-      <tr><td>Completion depended on agreed scope and evidence level</td><td>Confirmed</td><td>Judges accepted nothing. 77% of reviews asked for evidence, which rarely produced revisions (Fig. 4).</td></tr>
-      <tr><td>Some invitations were narrowed or refused</td><td>Not tested</td><td>Requires message-level coding. Left to the curated cases.</td></tr>
-      <tr><td>Agents wrote tools for coordinating their own work</td><td>Context added</td><td>Coordination already took 92% of tool calls as reading (Fig. 6–7).</td></tr>
-      <tr><td>No multi-agent performance advantage was established</td><td>Agreed</td><td>Still holds. No single-agent or assigned-team control exists.</td></tr>
+      <tr><td>Groups formed through specific requests and negotiated roles</td><td>Confirmed</td><td>37 rooms of 3–5 agents hold 62% of agent-written messages (Fig. 9).</td></tr>
+      <tr><td>Division of work became concrete at interfaces</td><td>Refined</td><td>68% of projects still had one author. Testing concentrated in two volunteers and the judges (Fig. 7–8).</td></tr>
+      <tr><td>Concrete counterexamples changed code</td><td>Refined</td><td>Real but rare. Probes look better than re-runs, but the interval includes zero once runs on the same project are treated as related (Fig. 3).</td></tr>
+      <tr><td>Passing components did not guarantee handoff</td><td>Confirmed</td><td>Half the failures after a builder's pass were missing files, and 793 reads were refused for unpublished source.</td></tr>
+      <tr><td>Completion depended on agreed scope and evidence</td><td>Confirmed</td><td>No acceptances. "Needs evidence" is followed by less revision than chance (Fig. 5).</td></tr>
+      <tr><td>No multi-agent performance advantage established</td><td>Agreed</td><td>There is still no single-agent or assigned-team control.</td></tr>
     </tbody>
   </table></div>
 </section>
@@ -246,22 +334,30 @@
 <section id="limits">
   <h2>Limitations</h2>
   <ul>
-    <li><b>One run, one model family.</b> All 28 agents share GPT-6.1 Sol, so peer review is the same model checking itself under a different prompt. There is no single-agent, assigned-team or no-judge control.</li>
-    <li><b>Replication vs. probe is a string match.</b> A peer command that differs only in flags counts as a new probe. A semantically new check reusing an old command counts as a replication. The classification is conservative in both directions.</li>
-    <li><b>Follow-through is observational.</b> Review types were not randomised, and "needs evidence" may cluster on projects already blocked by external requirements.</li>
-    <li><b>Projects are not independent.</b> Families share people, copied components and dependencies. Counts describe the event and are not samples.</li>
-    <li><b>Personas are not people.</b> The agents were seeded from residency applications. Nothing here evaluates the real applicants or their proposals.</li>
+    <li><b>One run, one model family.</b> Peer review here is the same model checking itself under a different prompt. There is no single-agent, assigned-team or no-judge control.</li>
+    <li><b>Replication vs. probe is a string match.</b> A command that differs only in flags counts as a new probe.</li>
+    <li><b>Observational feedback analysis.</b> Judges chose their wording per project, and the matched-time null controls for project lifetimes, not for project state.</li>
+    <li><b>The hypothesis was disclosed.</b> Agents knew the study was about completing projects through collaboration.</li>
+    <li><b>Keyword and topic measures are approximate.</b> Labels are assigned by published rules.</li>
+    <li><b>Personas are not people.</b> Nothing here evaluates the real applicants or their proposals.</li>
   </ul>
 </section>
 
 <section id="next">
-  <h2>Open questions</h2>
+  <h2>Future directions</h2>
   <ul>
-    <li><b>Can we buy probes instead of re-runs?</b> Require peer verifiers to submit a check that differs from the builder's, then measure confirmed defects per execution.</li>
-    <li><b>Can judges be actionable?</b> Randomise whether judges must phrase feedback as an executable change request. Measure follow-through and final acceptance.</li>
-    <li><b>Is the coordination overhead avoidable?</b> Add a pushed digest of shared-state changes and measure the read:execute ratio and wall time to a passing revision.</li>
-    <li><b>Does collaboration beat solo work?</b> Match total token budget across single-agent, assigned-team and self-organised conditions on the same project goals.</li>
+    <li><b>Buy probes, not re-runs.</b> Require peer verifiers to submit a check that differs from the builder's, then measure confirmed defects per execution.</li>
+    <li><b>Make judges' feedback executable.</b> Randomise whether judges must phrase every review as an executable change request, and measure follow-through and acceptance.</li>
+    <li><b>Hide the hypothesis.</b> Run the same population with a neutral prompt and compare evidence vocabulary, review requests and collaboration rates.</li>
+    <li><b>Assign roles, or don't.</b> Compare self-organised specialisation with assigned builder/tester pairs at equal token budget.</li>
+    <li><b>Collaboration vs. solo work.</b> Match budgets across single-agent, assigned-team and self-organised conditions on the same project goals.</li>
   </ul>
+</section>
+
+<section id="agents">
+  <h2>Appendix: per-agent record</h2>
+  <p>Sortable. Messages are agent-written only. Spend is the API-equivalent estimate from the usage ledger.</p>
+  <div id="tbl-agents"></div>
 </section>
 
 <section id="related">
@@ -269,7 +365,6 @@
   <ol class="refs">
     <li>Hong et al. <a href="https://arxiv.org/abs/2308.00352v7">MetaGPT: Meta Programming for A Multi-Agent Collaborative Framework</a>. ICLR 2024.</li>
     <li>Qian et al. <a href="https://aclanthology.org/2024.acl-long.810/">ChatDev: Communicative Agents for Software Development</a>. ACL 2024.</li>
-    <li>Xia et al. <a href="https://arxiv.org/abs/2407.01489v2">Agentless: Demystifying LLM-based Software Engineering Agents</a>. 2024.</li>
     <li>Xu et al. <a href="https://arxiv.org/abs/2412.14161v3">TheAgentCompany: Benchmarking LLM Agents on Consequential Real World Tasks</a>. 2024.</li>
     <li>Cemri et al. <a href="https://arxiv.org/abs/2503.13657v3">Why Do Multi-Agent LLM Systems Fail?</a> 2025.</li>
     <li>Kim et al. <a href="https://arxiv.org/abs/2512.08296v3">Towards a Science of Scaling Agent Systems</a>. 2025.</li>
@@ -282,8 +377,8 @@
 <section id="cite">
   <h2>BibTeX</h2>
 <pre class="bibtex"><button class="theme-btn copy-btn" type="button">Copy</button><code>@misc{srinivasan2026rerunning,
-  title  = {Re-running Is Not Reviewing: Team Formation, Verification and Feedback
-            among LLM Agents Building Software},
+  title  = {Re-running Is Not Reviewing: An Audited Analysis of Verification, Feedback
+            and the Division of Work among LLM Agents Building Software},
   author = {Srinivasan, Srinitish},
   year   = {2026},
   note   = {Agent Residency Studies, Study 2},
@@ -295,7 +390,7 @@
 
 <footer>
   <div class="wrap">
-    <p><b>Data and privacy.</b> All figures are computed from the frozen project snapshot, the run's usage ledger and the earlier audit's family classifications, using <code>analysis/build_data.py</code>. No resident code was executed to produce them. The page publishes only aggregate statistics and first-name labels. It does not include message text, source code, application forms, private memory or contact details.</p>
+    <p><b>Data and privacy.</b> All figures and tests are computed from the frozen project snapshot, the run database (read-only), the raw request/response audit and the earlier audit's family classifications, using <code>analysis/build_data.py</code> and <code>analysis/science.py</code>. No resident code was executed. The page publishes aggregate statistics, first-name labels and short, rule-selected excerpts of agent-generated messages and reviews. It does not include source code, application forms, private memory or contact details.</p>
     <p><b>Acknowledgements.</b> The case studies and family classifications come from an earlier automated audit of the same record by GPT-6.1 Sol and GPT-6.2 Astra. Charts are rendered with D3.</p>
   </div>
 </footer>

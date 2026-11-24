@@ -1,146 +1,199 @@
-/* Figures for Study 2 (project teams). Data: static/data/projects.json */
+/* Figures for Study 2 (project teams). Data: static/data/projects.json + science.json */
 (async function () {
-  const D = await (await fetch("static/data/projects.json")).json();
+  const [D, X] = await Promise.all([
+    fetch("static/data/projects.json").then((r) => r.json()),
+    fetch("static/data/science.json").then((r) => r.json()),
+  ]);
   const C = window.Charts, fmt = C.fmt;
   const $ = (id) => document.getElementById(id);
-  const pct = d3.format(".1%");
-  const O = D.overview;
+  const pct = d3.format(".0%"), pct1 = d3.format(".1%");
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const pfmt = (p) => (p == null ? "—" : p < 0.001 ? "< 0.001" : p.toFixed(3));
+  const T = Object.fromEntries(X.tests.map((t) => [t.id, t]));
+  const AU = X.audit, O = D.overview;
+  const wilson = (k, n) => { const z = 1.96, p = k / n, d = 1 + z * z / n, c = (p + z * z / (2 * n)) / d, h = z * Math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / d; return [Math.max(0, c - h), Math.min(1, c + h)]; };
 
   $("run-stats").innerHTML = [
-    [fmt(O.messages), "messages"],
-    [fmt(O.revisions), "source revisions"],
-    [fmt(O.executions), "sandboxed executions"],
-    [fmt(O.reviews), "judge reviews"],
-    [fmt(O.tool_calls), "tool calls"],
-    ["$" + Math.round(O.usd), "API-equivalent spend"],
+    [fmt(AU.calls), "model calls audited"], [fmt(O.messages), "agent-written messages"], [fmt(O.revisions), "source revisions"],
+    [fmt(O.executions), "sandboxed executions"], [fmt(O.reviews), "judge reviews"], ["$" + Math.round(O.usd), "API-equivalent spend"],
   ].map(([v, l]) => `<div class="stat"><b>${v}</b><span>${l}</span></div>`).join("");
+  $("aim").textContent = `“${AU.disclosed_aim}”`;
+  const sl = (id, t) => { $(id).textContent = `${t.test}: ${t.stat}` + (t.p != null ? `; p ${pfmt(t.p).startsWith("<") ? "" : "= "}${pfmt(t.p)}, BH-adjusted ${pfmt(t.p_bh)}` : ""); };
+  sl("sl-p1", T.P1); sl("sl-p3", T.P3); sl("sl-p4", T.P4); sl("sl-p6", T.P6); sl("sl-p11", T.P11);
+
+  // ---------- audit ----------
+  const dead = AU.lanes.find((l) => l.outage_h > 2);
+  const rec = AU.usage_rows.find((u) => u.status === "recorded");
+  const pr = AU.tool_runs.find((t) => t.tool === "project_read"), wr = AU.tool_runs.find((t) => t.tool === "web_read"), pa = AU.tool_runs.find((t) => t.tool === "project_artifact");
+  const re = Object.fromEntries(AU.read_errors.map((e) => [e.error, e.n]));
+  const items = [
+    ["sev-high", "High", "Platform receipts recorded as talk", `${AU.auto_posts} of ${fmt(AU.messages_total)} chat messages (${pct(AU.auto_posts / AU.messages_total)}) were posted by the platform under an agent's name: ${AU.post_kinds.run} execution receipts, ${AU.post_kinds.revision} revision notices, ${AU.post_kinds.review} review notices and ${AU.auto_posts - AU.post_kinds.run - AU.post_kinds.revision - AU.post_kinds.review} workspace posts. They are excluded from all talk measures.`],
+    ["sev-high", "High", "A worker died and was not revived", `${dead.agent} stopped at ${dead.outages[0][0].toFixed(1)} active h and made one call after the pause. Absent for ${dead.outage_h.toFixed(1)} of ${AU.active_h.toFixed(1)} h (${dead.calls} calls vs ${AU.calls_range_others[0]}–${AU.calls_range_others[1]} for everyone else). Worker supervision logged no repair.`],
+    ["sev-mid", "Medium", "The hypothesis was in the prompt", `Every one of ${fmt(AU.calls)} system prompts stated the study's aim and told agents to separate drafts from tested and validated work. That plausibly shapes the evidence-heavy talk.`],
+    ["sev-mid", "Medium", "Reads of unpublished work", `${fmt(pr.failed)} of ${fmt(pr.total)} project reads failed: ${re["Publish source files before running or reviewing"]} because the source was not yet published, ${re["Source file not found"]} for missing files. Web reads failed ${wr.failed}/${wr.total} (mostly HTTP 403), artifact fetches ${pa.failed}/${pa.total}.`],
+    ["sev-ok", "OK", "Ledger reconciles with raw responses", `Raw responses: ${fmt(AU.audit_tokens.in)} input / ${fmt(AU.audit_tokens.out)} output tokens. Ledger: ${fmt(rec.in)} / ${fmt(rec.out)} (exact match).`],
+    ["sev-ok", "OK", "Responses are well-formed", `${AU.provider_errors} provider errors and ${AU.parse_errors} unparseable actions in ${fmt(AU.calls)} calls. Median model latency ${AU.latency_median_s} s (p90 ${AU.latency_p90_s} s). The operator pause (${AU.pauses_h.toFixed(1)} h) is excluded from the clock.`],
+  ];
+  $("audit-items").innerHTML = items.map(([c, s, h, p]) => `<div class="audit-item ${c}"><span class="sev">${s}</span><h4>${h}</h4><p>${esc(p)}</p></div>`).join("");
+  const unk = AU.usage_rows.filter((u) => u.status !== "recorded").reduce((a, u) => a + u.rows, 0);
+  $("tbl-audit").innerHTML = `<thead><tr><th>Check</th><th>Value</th><th>Status</th></tr></thead><tbody>${[
+    ["Model calls issued / completed", `${fmt(AU.calls)} / ${fmt(AU.completed)}`, `${AU.calls - AU.completed} incomplete`],
+    ["Ledger rows recorded / rejected or unknown", `${fmt(rec.rows)} / ${unk}`, `= the ${AU.provider_errors} provider errors`],
+    ["Input tokens: raw responses vs ledger", `${fmt(AU.audit_tokens.in)} vs ${fmt(rec.in)}`, "exact match"],
+    ["Output tokens: raw responses vs ledger", `${fmt(AU.audit_tokens.out)} vs ${fmt(rec.out)}`, "exact match"],
+    ["Chat messages: total / agent-written", `${fmt(AU.messages_total)} / ${fmt(AU.messages_total - AU.auto_posts)}`, "receipts excluded"],
+    ["Active / paused hours", `${AU.active_h.toFixed(2)} / ${AU.pauses_h.toFixed(2)}`, "pause excluded"],
+    ["Spend (API-equivalent)", "$" + rec.usd.toFixed(2), "—"],
+  ].map((r) => `<tr>${r.map((c) => `<td>${esc(c)}</td>`).join("")}</tr>`).join("")}</tbody>`;
+
+  // ---------- conversations ----------
+  const kindName = { probe: "A peer probe that found a defect", review: "A fast response that fixed nothing", team: "The largest team", friction: "Handing source over", dispute: "Disagreement, then concession" };
+  $("convos").innerHTML = X.conversations.map((c, i) => {
+    let prev = 0;
+    const turns = c.turns.map((t) => {
+      const gap = t.seq - prev > 1 && prev > 0 ? `<div class="turn gap">… ${t.seq - prev - 1} message${t.seq - prev - 1 > 1 ? "s" : ""} omitted …</div>` : "";
+      prev = t.seq;
+      return `${gap}<div class="turn"><div class="who">${esc(t.who)}<span>msg ${t.seq} · ${t.h.toFixed(2)} h</span></div><q>${esc(t.text)}</q></div>`;
+    }).join("");
+    const fb = c.review ? `<div class="feedback"><b>${esc(c.review.judge)}'s review (${esc(c.review.decision.replace("_", " "))}):</b> ${esc(c.review.feedback)}</div>` : "";
+    const run = c.run ? `<div class="stat-line" style="margin:0 0 8px">failed probe: ${esc(c.run.cmd)}</div>` : "";
+    return `<article class="convo"><header><h4>${i + 1}. ${esc(kindName[c.kind] || c.kind)}</h4><span class="meta">${esc(c.people.join(", "))}${c.project ? " · " + esc(c.project) : ""}</span></header>
+      <p class="why">${esc(c.why)}</p>${fb}${run}${turns}<p class="crit">Selection rule: ${esc(c.criterion)}</p></article>`;
+  }).join("");
+
+  // ---------- tests ----------
+  const verdict = (t) => {
+    if (t.id === "P1") return ["weak", "Significant, not cluster-robust"];
+    if (t.p == null) return ["est", "Estimate"];
+    return t.p_bh < 0.05 ? ["yes", "Supported"] : ["no", "Not supported"];
+  };
+  $("tbl-tests").innerHTML = `<div class="table-wrap"><table class="compare tests"><thead><tr><th>ID</th><th>Hypothesis</th><th>Test</th><th>Result</th><th>p (BH)</th><th>Verdict</th></tr></thead><tbody>${
+    X.tests.slice().sort((a, b) => +a.id.slice(1) - +b.id.slice(1)).map((t) => { const [c, v] = verdict(t); return `<tr><td>${t.id}</td><td>${esc(t.claim)}</td><td>${esc(t.test)}</td><td>${esc(t.stat)}${t.note ? `<br><span style="color:var(--muted);font-size:12.5px">${esc(t.note)}</span>` : ""}</td><td>${pfmt(t.p_bh)}</td><td><span class="verdict ${c}">${v}</span></td></tr>`; }).join("")
+  }</tbody></table></div>`;
+
+  C.table($("tbl-agents"), {
+    rows: D.agents.map((a) => ({ ...a, archetype: (X.division.agents.find((x) => x.agent === a.agent) || {}).archetype || "" })),
+    columns: [
+      { key: "agent", label: "Agent" }, { key: "archetype", label: "Archetype" }, { key: "messages", label: "Messages" }, { key: "revisions", label: "Revisions" },
+      { key: "executions", label: "Executions" }, { key: "tool_calls", label: "Tool calls" }, { key: "usd", label: "Spend ($)", fmt: (v) => v.toFixed(2) },
+    ],
+  });
 
   const V = D.verification;
-  const rate = (o) => o.fail / o.n;
-
   C.register(() => {
     // Fig 1: network
     const rmax = d3.max(D.network.nodes, (n) => n.messages);
     C.network($("fig-network"), {
       nodes: D.network.nodes, edges: D.network.edges, height: Math.min(520, Math.max(380, $("fig-network").clientWidth * 0.55)),
       colorOf: (d) => (d.judge ? "--s2" : "--s1"), radius: (d) => 4 + 10 * Math.sqrt(d.messages / rmax),
-      tipFmt: (d) => `<b>${d.id}</b>${d.judge ? " (judge)" : ""}<br>${fmt(d.messages)} messages<br>betweenness ${d.betweenness.toFixed(3)}`,
+      tipFmt: (d) => `<b>${d.id}</b>${d.judge ? " (judge)" : ""}<br>${fmt(d.messages)} agent-written messages<br>betweenness ${d.betweenness.toFixed(3)}`,
     });
 
-    // Fig 2: failure rates by run kind
-    const vrows = [
-      { k: "Builder's own runs", o: V.self },
-      { k: "Peer: replication", o: V["peer-replication"] },
-      { k: "Peer: new probe", o: V["peer-new-probe"] },
-      { k: "Peer, after builder passed", o: V.peer_after_self_pass },
-    ].map((r) => ({ label: r.k, rate: rate(r.o), ...r.o }));
-    C.hbars($("fig-verify"), {
-      data: vrows, label: "label", keys: ["rate"], colors: (d) => (d.label.includes("new probe") ? "--s2" : "--s1"),
-      stacked: false, valueFmt: d3.format(".0%"), valueLabels: (d) => pct(d.rate), labelW: 170, rowH: 34, xMax: 0.25,
-      xLabel: "share of executions that failed →",
-      tipFmt: (d) => `<b>${d.label}</b><br>${fmt(d.fail)} failed of ${fmt(d.n)} (${pct(d.rate)})<br>${d.fail_missing} of the failures were missing files/modules`,
+    // Fig 2: lanes
+    C.swimlanes($("fig-lanes"), { lanes: AU.lanes.slice().sort((a, b) => (a.judge - b.judge) || (b.calls - a.calls)), xMax: AU.active_h, xLabel: "active hours →", rowH: 14, labelW: 80 });
+
+    // Fig 3: verification forest
+    const vr = [
+      ["Builder's own runs", V.self], ["Peer: replication", V["peer-replication"]], ["Peer: new probe", V["peer-new-probe"]], ["Peer, after builder passed", V.peer_after_self_pass],
+    ].map(([label, o]) => ({ label, est: o.fail / o.n, ci: wilson(o.fail, o.n), ...o }));
+    C.forest($("fig-verify"), {
+      rows: vr, xDomain: [0, 0.3], xFormat: d3.format(".0%"), xLabel: "share failed →", labelW: 190,
+      colorOf: (r) => (r.label.includes("probe") ? "--s2" : "--s1"),
+      tipFmt: (r) => `<b>${r.label}</b><br>${r.fail} of ${r.n} failed (${pct1(r.est)})<br>95% CI ${pct1(r.ci[0])}–${pct1(r.ci[1])}<br>${r.fail_missing} were missing files/modules`,
+    });
+    // Fig 4: by role × kind
+    const rk = X.verify_by_role_kind.map((r) => ({ ...r, label: `${r.role} · ${r.kind === "peer-new-probe" ? "new probe" : "replication"}`, est: r.fail / r.n, ci: wilson(r.fail, r.n) }));
+    C.forest($("fig-verify-role"), {
+      rows: rk, xDomain: [0, 0.4], xFormat: d3.format(".0%"), xLabel: "share failed →", labelW: 190,
+      colorOf: (r) => (r.role === "Judges" ? "--s2" : "--s1"),
+      tipFmt: (r) => `<b>${r.label}</b><br>${r.fail} of ${r.n} failed (${pct1(r.est)})<br>95% CI ${pct1(r.ci[0])}–${pct1(r.ci[1])}`,
     });
 
-    // Fig 3: by role
-    const role = [
-      { label: "Judges (3)", rep: V.peer_by_judges.n - V.peer_by_judges.new_probes, probe: V.peer_by_judges.new_probes, ...V.peer_by_judges },
-      { label: "Residents (25)", rep: V.peer_by_residents.n - V.peer_by_residents.new_probes, probe: V.peer_by_residents.new_probes, ...V.peer_by_residents },
-    ];
-    C.hbars($("fig-verify-role"), {
-      data: role, label: "label", keys: ["rep", "probe"], colors: ["--s1", "--s2"], names: ["Replications", "New probes"],
-      labelW: 110, rowH: 40, valueW: 170, valueLabels: (d) => `${fmt(d.n)} runs · ${pct(d.fail / d.n)} failed`, xLabel: "peer executions →",
-      tipFmt: (d, k) => `<b>${d.label}</b><br>${k === "rep" ? "Replications" : "New probes"}: ${fmt(d[k])}<br>failure rate overall: ${pct(d.fail / d.n)}`,
+    // Fig 5: review follow-through
+    const nice = { needs_evidence: "Needs evidence", changes_requested: "Changes requested", simulation_demo_ready: "Demo ready", random_time: "Random time (baseline)" };
+    const rr = X.review_response.rows.filter((r) => r.decision !== "simulation_demo_ready").map((r) => ({ ...r, label: nice[r.decision], est: r.revised / r.n }));
+    const base = rr.find((r) => r.decision === "random_time").est;
+    C.forest($("fig-follow"), {
+      rows: rr, xDomain: [0, 1], ref: base, xFormat: d3.format(".0%"), xLabel: "revised within 30 min →", labelW: 160,
+      colorOf: (r) => (r.decision === "changes_requested" ? "--s2" : r.decision === "random_time" ? "--neutral" : "--s1"),
+      tipFmt: (r) => `<b>${r.label}</b><br>${fmt(r.revised)} of ${fmt(r.n)} (${pct(r.est)})<br>95% CI ${pct(r.ci[0])}–${pct(r.ci[1])}`,
     });
-    // add a legend line under the chart title once
-    if (!$("fig-verify-role").previousElementSibling.classList.contains("legend")) {
-      const lg = document.createElement("div"); lg.className = "legend";
-      lg.innerHTML = '<span><i style="background:var(--s1)"></i>Replications</span><span><i style="background:var(--s2)"></i>New probes</span>';
-      $("fig-verify-role").before(lg);
-    }
-
-    // Fig 4: judges
+    const curve = (k) => { const v = X.review_response.curves[k], n = X.review_response.curve_n[k]; return [[0, 0], ...v.map((m, i) => [Math.min(m, 240), (i + 1) / n])]; };
+    C.line($("fig-curves"), {
+      series: [{ name: "Changes req.", color: "--s2", values: curve("changes_requested"), step: true }, { name: "Needs evid.", color: "--s1", values: curve("needs_evidence") }],
+      xMax: 240, yMax: 1, yFormat: d3.format(".0%"), xLabel: "minutes after review →", xFormat: d3.format(".0f"), height: 230,
+      markers: [{ x: 30, label: "30 min" }],
+    });
     C.hbars($("fig-judges"), {
       data: D.judges.by_judge, label: "judge", keys: ["needs_evidence", "changes_requested", "simulation_demo_ready"],
-      colors: ["--s1", "--s2", "--s3"], names: ["Needs evidence", "Changes requested", "Demo ready"], labelW: 70, rowH: 36, valueLabels: true,
-      tipFmt: (d, k) => `<b>${d.judge}</b> · ${d.remit}<br>${{ needs_evidence: "Needs evidence", changes_requested: "Changes requested", simulation_demo_ready: "Demo ready" }[k]}: ${d[k]}`,
-    });
-    const follow = D.judges.followed_by_revision.filter((r) => r.reviews >= 5).map((r) => ({
-      label: { needs_evidence: "Needs evidence", changes_requested: "Changes requested" }[r.decision], share: r.revised / r.reviews, ...r,
-    }));
-    C.hbars($("fig-follow"), {
-      data: follow, label: "label", keys: ["share"], colors: (d) => (d.decision === "changes_requested" ? "--s2" : "--s1"),
-      stacked: false, xMax: 1, valueFmt: d3.format(".0%"), valueLabels: (d) => d3.format(".0%")(d.share), labelW: 130, rowH: 40,
-      tipFmt: (d) => `<b>${d.label}</b><br>${d.revised} of ${d.reviews} followed by a revision<br>median lag ${d.median_lag_min} min`,
+      colors: ["--s1", "--s2", "--s3"], names: ["Needs evidence", "Changes requested", "Demo ready"], labelW: 70, rowH: 34, valueLabels: true,
+      tipFmt: (d, k) => `<b>${d.judge}</b> · ${d.remit}<br>${nice[k]}: ${d[k]}`,
     });
 
-    // Fig 5: room sizes, share of messages
-    const totalP = d3.sum(D.room_sizes, (r) => r.messages);
-    const rs = [2, 3, 4, 5].map((s) => {
-      const r = D.room_sizes.find((x) => x.size === s) || { messages: 0, rooms: 0 };
-      return { size: s + " members", p: r.messages / totalP, n: s === 2 ? 1 : 0, rooms: r.rooms, msgs: r.messages };
+    // Fig 7: role heat
+    const ag = X.division.agents;
+    C.heat($("fig-roles"), {
+      rows: ag, cols: X.division.roles, label: (r) => `${r.agent} · ${r.archetype}`, value: (r, j) => r.share[j], max: 0.8, labelW: 150, cellH: 19,
+      groupOf: (r) => r.archetype,
+      tipFmt: (r, j) => `<b>${r.agent}</b> (${r.archetype})<br>${X.division.roles[j]}: ${r.counts[j]} (${pct(r.share[j])} of actions)<br>specialisation ${r.specialisation.toFixed(2)}`,
     });
+
+    // Fig 8: lorenz + builders
+    const L = X.division.lorenz, G = X.division.gini;
+    C.line($("fig-lorenz"), {
+      series: [
+        { name: "Messages", color: "--s1", values: L["Messages"] },
+        { name: "Revisions", color: "--s3", values: L["Revisions (all)"] },
+        { name: "Peer tests", color: "--s2", values: L["Peer test runs"] },
+        { name: "Equality", color: "--axis", values: [[0, 0], [1, 1]] },
+      ],
+      xMax: 1, yMax: 1, xFormat: d3.format(".0%"), yFormat: d3.format(".0%"), xLabel: "share of residents (least active first) →", height: 260, directLabels: false,
+    });
+    const bh = Object.entries(X.division.builders_hist).map(([k, v]) => ({ k: k + (k === "1" ? " author" : " authors"), n: v }));
+    C.bars($("fig-builders"), { data: bh, x: "k", keys: ["n"], colors: ["--s1"], names: ["projects"], yLabel: "projects", height: 260, tipFmt: (d) => `<b>${d.k}</b><br>${d.n} projects` });
+
+    // Fig 9: room sizes + talk/build
+    const tot = d3.sum(X.room_sizes, (r) => r.messages);
+    const rs = [2, 3, 4, 5].map((s) => { const r = X.room_sizes.find((x) => x.size === s) || { messages: 0, rooms: 0 }; return { size: s + " members", p: r.messages / tot, n: s === 2 ? 1 : 0, rooms: r.rooms, msgs: r.messages }; });
     C.bars($("fig-roomsize"), {
-      data: rs, x: "size", keys: ["p", "n"], colors: ["--s1", "--s2"], names: ["Projects", "Networking"],
-      yFormat: d3.format(".0%"), yMax: 1, yLabel: "share of messages", height: 240,
-      tipFmt: (d, k) => k === "p" ? `<b>Projects · ${d.size}</b><br>${d.rooms} rooms · ${fmt(d.msgs)} messages (${d3.format(".0%")(d.p)})`
-        : `<b>Networking · ${d.size}</b><br>${d.n ? "all 207 rooms · 100% of messages" : "no rooms"}`,
+      data: rs, x: "size", keys: ["p", "n"], colors: ["--s1", "--s2"], names: ["Projects", "Networking"], yFormat: d3.format(".0%"), yMax: 1, yLabel: "share of messages", height: 260,
+      tipFmt: (d, k) => k === "p" ? `<b>Projects · ${d.size}</b><br>${d.rooms} rooms · ${fmt(d.msgs)} messages (${pct(d.p)})` : `<b>Networking · ${d.size}</b><br>${d.n ? "all 207 rooms" : "no rooms"}`,
     });
-
-    // Fig 6: tool allocation per agent
-    const cats = ["Read state", "Write / publish", "Execute", "Web", "Judge review"];
-    const rows = D.tools.by_agent.map((r) => ({ ...r, label: r.judge ? r.agent + " (judge)" : r.agent }));
-    C.hbars($("fig-tools"), {
-      data: rows, label: "label", keys: cats, colors: ["--s1", "--s2", "--s3", "--s4", "--s5"], names: cats,
-      labelW: 110, rowH: 18, xLabel: "tool calls →",
-      tipFmt: (d, k) => { const t = d3.sum(cats, (c) => d[c]); return `<b>${d.label}</b><br>${k}: ${fmt(d[k])} (${d3.format(".1%")(d[k] / t)})<br>total ${fmt(t)}`; },
-    });
-
-    // Fig 7: read/execute ratio per half hour
-    const tl = D.tools.timeline.filter((t) => t.Execute >= 10).map((t) => ({ ...t, label: t.h.toFixed(1), ratio: t["Read state"] / t.Execute }));
-    C.bars($("fig-ratio"), {
-      data: tl, x: "label", keys: ["ratio"], colors: ["--s1"], yLabel: "reads per execution", xLabel: "wall-clock hour →", height: 240,
-      shade: { when: (d) => d.h >= 10, label: "after 7 h pause" },
-      tipFmt: (d) => `<b>${d.h.toFixed(1)}–${(d.h + 0.5).toFixed(1)} h</b><br>${fmt(d["Read state"])} reads · ${fmt(d.Execute)} executions<br>ratio ${d.ratio.toFixed(1)} : 1`,
-    });
-
-    // Fig 8: talk vs build
-    const emax = d3.max(D.talk_build.points, (p) => p.executions);
+    const pmax = d3.max(X.talk_build, (p) => p.peer_runs) || 1;
     C.scatter($("fig-talkbuild"), {
-      points: D.talk_build.points, x: "messages", y: "revisions", label: "agent", xLabel: "messages sent", yLabel: "revisions authored",
-      sizeOf: (d) => 4 + 9 * Math.sqrt(d.executions / emax),
-      labelIf: (d) => d.messages > 125 || d.revisions >= 15 || d.messages < 45,
-      tipFmt: (d) => `<b>${d.agent}</b><br>${d.messages} messages · ${d.revisions} revisions<br>${d.executions} executions · $${d.usd.toFixed(2)}`,
+      points: X.talk_build, x: "messages", y: "revisions", label: "agent", xLabel: "agent-written messages", yLabel: "revisions authored", height: 260,
+      sizeOf: (d) => 4 + 10 * Math.sqrt(d.peer_runs / pmax),
+      labelIf: (d) => d.messages > 75 || d.revisions >= 14 || d.peer_runs >= 10,
+      tipFmt: (d) => `<b>${d.agent}</b> · ${d.archetype}<br>${d.messages} messages · ${d.revisions} revisions<br>${d.peer_runs} peer test runs · ${fmt(d.reads)} project reads`,
     });
 
-    // Fig 9: lifecycle
-    C.bars($("fig-revs"), {
-      data: D.revisions_per_project.map((r) => ({ ...r, label: String(r.revisions) })), x: "label", keys: ["projects"], colors: ["--s1"],
-      xLabel: "revisions", yLabel: "entries", height: 210, tipFmt: (d) => `<b>${d.projects}</b> entries with ${d.revisions} revision${d.revisions === 1 ? "" : "s"}`,
+    // Fig 10: explore / premature
+    C.bars($("fig-explore"), {
+      data: X.explore.map((e) => ({ ...e, label: e.h.toFixed(1) })), x: "label", keys: ["revisions_new", "revisions_old"], stacked: true,
+      colors: ["--s4", "--s1"], names: ["to new projects", "to older projects"], xLabel: "active hour →", yLabel: "revisions", height: 240,
+      tipFmt: (d) => `<b>${d.h.toFixed(1)}–${(d.h + 0.5).toFixed(1)} h</b><br>${d.new_projects} projects created<br>${d.revisions_new} revisions to projects &lt; 30 min old<br>${d.revisions_old} to older projects`,
     });
-    C.histogram($("fig-ttg"), { values: D.time_to_first_pass_min.values.filter((v) => v > 0), log: true, domain: [-0.5, 3], thresholds: 14, xLabel: "minutes", yLabel: "entries", color: "--s3", height: 210, unit: " min" });
+    C.bars($("fig-premature"), {
+      data: X.premature_reads.map((p) => ({ ...p, label: p.h + "–" + (p.h + 1) })), x: "label", keys: ["share"], colors: ["--s2"], names: ["refused"],
+      yFormat: d3.format(".0%"), yMax: 0.1, xLabel: "active hour →", yLabel: "share of reads", height: 240,
+      tipFmt: (d) => `<b>hour ${d.label}</b><br>${d.unpublished} of ${fmt(d.n)} reads refused (${pct1(d.share)})`,
+    });
 
-    // Fig 10: outcomes
-    const nice = { working_component: "Working component", incomplete: "Incomplete", written_artifact: "Written artifact", failing_tests: "Failing tests", negative_result: "Negative result" };
+    // Fig 11: topics
+    C.multiples($("fig-topics"), { series: X.topics.series, xMax: Math.floor(AU.active_h), minW: 210, height: 104 });
+
+    // Fig 12: outcomes
+    const on = { working_component: "Working component", incomplete: "Incomplete", written_artifact: "Written artifact", failing_tests: "Failing tests", negative_result: "Negative result" };
     C.hbars($("fig-outcomes"), {
-      data: (D.families || []).map((f) => ({ label: nice[f.outcome] || f.outcome, n: f.families })), label: "label", keys: ["n"],
+      data: (D.families || []).map((f) => ({ label: on[f.outcome] || f.outcome, n: f.families })), label: "label", keys: ["n"],
       colors: ["--s1"], names: ["families"], valueLabels: true, labelW: 140, rowH: 28,
     });
 
-    // Fig 11: cross-setting
+    // Fig 13: cross-setting
     C.scatter($("fig-cross"), {
-      points: D.cross_setting.points.filter((p) => !p.judge), x: "networking", y: "projects", label: "agent",
-      xLabel: "messages while networking", yLabel: "messages in project run", height: 300,
-      labelIf: (d) => d.projects >= 100 || d.networking >= 175 || d.projects < 45,
+      points: X.cross_setting, x: "networking", y: "projects", label: "agent", xLabel: "messages while networking", yLabel: "messages in project run", height: 300,
+      labelIf: () => true,
       tipFmt: (d) => `<b>${d.agent}</b><br>networking: ${d.networking} messages<br>projects: ${d.projects} messages`,
     });
-  });
-
-  C.table($("tbl-agents"), {
-    rows: D.agents,
-    columns: [
-      { key: "agent", label: "Agent" }, { key: "messages", label: "Messages" }, { key: "revisions", label: "Revisions" },
-      { key: "executions", label: "Executions" }, { key: "tool_calls", label: "Tool calls" }, { key: "role", label: "Role" },
-      { key: "usd", label: "Spend ($)", fmt: (v) => v.toFixed(2) },
-    ],
   });
 })();

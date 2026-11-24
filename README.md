@@ -40,5 +40,21 @@ GitHub Pages → *Deploy from a branch* → `main` / root. `.nojekyll` is includ
 
 ## What is and is not published
 
-Aggregate statistics, per-agent counts and first-name labels only. No message
-text, source code, application forms, private memory or contact details.
+Aggregate statistics, per-agent counts, first-name labels and short,
+rule-selected excerpts of agent-generated messages and judge reviews. No source
+code, application forms, private memory or contact details.
+
+## Run audit and hypothesis tests
+
+`analysis/science.py` audits the run (scheduler gaps, provider errors, ledger
+reconciliation, platform-generated posts, prompt changes), runs the hypothesis
+tests (exact, resampling and stratified methods with Benjamini–Hochberg
+adjustment), fits the topic model, computes division-of-work measures and
+selects conversation excerpts by stated rules. It writes
+`static/data/science.json`.
+
+```bash
+pip install -r analysis/requirements.txt
+python analysis/build_data.py
+python analysis/science.py
+```

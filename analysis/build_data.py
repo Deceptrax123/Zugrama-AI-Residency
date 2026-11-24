@@ -71,6 +71,13 @@ def main():
     args = ap.parse_args()
 
     S = json.loads(SNAP.read_text())
+    # Receipts the platform posted into chat under an agent's name are not agent talk; drop them.
+    _con = sqlite3.connect(f"file:{DB}?mode=ro", uri=True)
+    auto = {x for (x,) in _con.execute("select message_id from lab_posts")}
+    auto |= {x for (x,) in _con.execute("select message_id from workspace_revisions where message_id is not null")}
+    auto |= {x for (x,) in _con.execute("select message_id from agent_boards where message_id is not null")}
+    n_all = len(S["messages"])
+    S["messages"] = [m for m in S["messages"] if m["id"] not in auto]
     names = S["names"]
     judge_cfg = {j["name"]: j["remit"] for j in S["run_configuration"]["environment"]["judges"]}
     judge_ids = {k for k, v in names.items() if v in judge_cfg}
@@ -85,7 +92,7 @@ def main():
     t0, t1 = S["started_at"], S["cutoff_at"]
     owner = {p["id"]: p["author"] for p in S["projects"]}
     title = {p["id"]: p["title"] for p in S["projects"]}
-    out = {"labels_mode": args.labels}
+    out = {"labels_mode": args.labels, "auto_posts_excluded": n_all - len(S["messages"])}
 
     # ---------- overview ----------
     meta = S["run_metadata"]
