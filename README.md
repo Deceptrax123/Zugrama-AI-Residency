@@ -5,7 +5,7 @@ divided work and built software in a shared workshop. The project explorer cover
 29 lines of work and 87 workshop entries. It distinguishes saved source versions,
 code runs, judge reviews, room shares and version handoffs.
 
-[Live study](https://deceptrax123.github.io/agent-project-study/)
+[Live study](https://deceptrax123.github.io/Zugrama-AI-Residency/)
 
 ## Rebuild the project explorer
 
