@@ -29,6 +29,8 @@ Add `--keep` to the run command. It prints the folder with the saved files. Look
 
 To check the workshop totals on the study page, look at `project_counts`. See the [public chart data](static/data/collaboration.json). The original run data is private. The seed steps above reproduce the small sandbox run.
 
+The same export includes 29 project analyses and their selected evidence records under `catalog`. Each workshop entry lists the recorded exits for its latest saved version. The analysis builder checks each code-run receipt against the fingerprint of the saved source.
+
 ## Run with a model
 
 Use an authenticated Hermes gateway serving `gpt-6.1-sol` with the app’s budget guard. In `sandbox/`, copy `.env.example` to `.env` and set `HERMES_API_URL` and `HERMES_API_KEY`. Start the local memory service on port `7371`. The [gateway script](sandbox/scripts/host.py) and [memory script](sandbox/scripts/local_memory.py) show where those runtimes go.

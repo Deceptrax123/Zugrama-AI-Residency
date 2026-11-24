@@ -1,0 +1,382 @@
+{
+  "civic": {
+    "goal": "Ganesh proposed a reporting screen and shared dashboard. Aditya proposed a workflow where a steward can claim a repair and the original reporter can confirm or reopen it.",
+    "collaboration": "Ganesh merged the two proposals and took intake and the dashboard. Aditya built the reporting history, Mahboob kept contribution records in separate files, and Gaurav tested the workflow from a user’s perspective. Tuhin checked text intake and storage boundaries.",
+    "decision": "The team kept confirmation with the original reporter. Gaurav also showed that a refresh error could hide confirmation of a successful save. The team fixed the UI. When a later persistence test expected the wrong status, Ganesh corrected the test and kept the shared reporting rule.",
+    "observed": "The core passed 47 tests and four simulated reporting cases. The separate persistence adapter reached 34 passing tests with one web-request test skipped. An independent run also checked the repaired submission feedback.",
+    "open": "The persistence adapter still needed to be connected to the web app. Sudden shutdown and ambiguous save outcomes stayed open, and the study recorded no trial with residents or stewards.",
+    "checkpoints": [
+      1,
+      2,
+      4,
+      7,
+      8
+    ]
+  },
+  "ingest": {
+    "goal": "Import and find sample records while retaining their origins and keeping separate people’s records apart. Withdrawing a record should remove it from ordinary retrieval.",
+    "collaboration": "Shriyanshi asked Alipat for a privacy review and offered an importer in exchange. Shriyanshi took storage and ingestion. Alipat defined the record rules and wrote separate tests and a command-line tool.",
+    "decision": "They agreed that importing the same material again should preserve a prior withdrawal. A later change to make error messages safer left an old test expecting the previous behavior, which the team updated.",
+    "observed": "Both collaborators ran the main package’s 50-test suite successfully at version 5. The saved package included example data and instructions alongside the code.",
+    "open": "The separate walkthrough using only the saved instructions was still pending. The work used sample records and did not establish clinical use, protected access or encrypted storage.",
+    "checkpoints": [
+      0,
+      2,
+      4
+    ]
+  },
+  "sign": {
+    "goal": "Turn continuous signing into text and eventually turn text or speech into visual signs. The engineering work narrowed to invented sign sequences and a text adapter that could be reused.",
+    "collaboration": "Tuhin built the decoder and text adapter. Disha contributed a separate scoring and evaluation package. Anuj tested the adapter in the memory project, and Ganesh worked on the civic intake boundary.",
+    "decision": "The reviewers kept the frozen decoder and scorer fixed while repairing missing files in their copies. That let them reproduce the original errors without conflating a packaging fix with an improvement in accuracy.",
+    "observed": "The retained baseline showed two extra tokens and one missing token across 12 reference tokens. The Hindi and English text adapter also earned separate passing checks in the workshop and in Anuj’s receiving copy.",
+    "open": "Fluent signers did not evaluate the system. The recorded results cover invented sequences and text intake, with visual signing and speech still outside the demonstrated path.",
+    "checkpoints": [
+      1,
+      2,
+      3,
+      4
+    ]
+  },
+  "export": {
+    "goal": "Let a person review exactly which memories they are about to share and who will receive them. Only that approved selection should reach the sending queue.",
+    "collaboration": "Anuj brought the memory component. Hiro took the approval step and the connection to memory. Aditya reviewed the agreed behavior, Disha contributed independent approval tests, and Gaurav was ready to check a working combination.",
+    "decision": "Hiro clarified that the remaining work was the adapter itself. Anuj already had permission to share the necessary source. They eventually reassigned selected setup files to Anuj and left the workbench and command-line work with Hiro.",
+    "observed": "The independent gate suite reached 35 passing tests. Anuj also saved tests for the missing connection. Those files defined what a combined version would need to do.",
+    "open": "The final file agreement had no saved combined implementation or execution at cutoff. There was no run from selecting memories through approval and delivery.",
+    "checkpoints": [
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  "memory": {
+    "goal": "Keep Hindi and English notes offline, retrieve a response with its source, and let someone share or remove selected memories. The original aim also included voice and exchange between devices.",
+    "collaboration": "Anuj built the memory store and retrieval. Tuhin supplied text intake, Hiro took the approval proposal, and Gaurav and Lou checked separate retrieval and deletion paths.",
+    "decision": "The first forgetting review copy omitted its tests. After that was repaired, Gaurav found that checking only counts and status could miss wrong answers. The team checked exact retrieved answers and their sources.",
+    "observed": "A retained independent benchmark ran five restarts and 500 exact retrieval checks. Lou reproduced local deletion and checked what happens when other copies already exist. The final text store reached a 29-test checkpoint.",
+    "open": "The approval connection was unfinished. The results cover text and local behavior, with physical devices, speech and removal of other people’s copies outside the demonstrated scope.",
+    "checkpoints": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  "d01": {
+    "goal": "Use simulated brain-signal readings and permission checks to decide whether a light or voice response could be proposed. Keep the resulting session record under participant control.",
+    "collaboration": "Rajat built the controller. Dhruv offered independent checks and helped define the permission interface. Sachit took the consent component. Danish and Bhuvan tested separate controller behaviors.",
+    "decision": "Danish showed that widely spaced readings could still satisfy a recovery check. The team tightened what counted as uninterrupted recovery, then checked the updated behavior independently.",
+    "observed": "The record contains an independent seven-step simulation and a separate seven-case reciprocal controller check. A frozen review copy also exercised negative cases with a simplified permission component.",
+    "open": "Connecting the controller to the real consent gate and private session storage remained unfinished. The controller proposed actions in simulation and did not operate hardware or measure human safety.",
+    "checkpoints": [
+      1,
+      2,
+      4,
+      6
+    ]
+  },
+  "value": {
+    "goal": "Keep a private record, choose part of it for a named reviewer, and add the reviewer’s attributed assessment to the log.",
+    "collaboration": "Moses owned the overall assembly and record component. Mahboob worked on contribution records, Sachit wrote independent checks, and Bristin offered a separately tested storage component.",
+    "decision": "Copy permission covered specific contributors’ files and reviewers. Permission for one review copy could not be carried over automatically to another. Moses separately identified his own assembly work as the final blocker.",
+    "observed": "Mahboob independently reproduced 53 passing tests for the standalone protocol and encrypted-record component. The storage substitute had a separate test record.",
+    "open": "The combined entry stayed empty. The run did not show a saved record surviving restart and then moving through disclosure and review as one workflow.",
+    "checkpoints": [
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  "bio": {
+    "goal": "Compare how people interpret a fictional risk alert with and without an explanation of the evidence and uncertainty behind it.",
+    "collaboration": "Kishore owned the study and analysis. Amruth supplied fictional cases and the evidence engine. Pratik built a balanced schedule. Gaurav tested the reader and contributed a separate completeness checker.",
+    "decision": "A display version showed both views and included clues in the titles. The repair showed one view at a time. The team kept the already exposed agent walkthrough separate from a blinded participant session.",
+    "observed": "Lou independently ran 18 tests on the repaired display. Kishore also reran Gaurav’s 25-test completeness checker. These checked the software and the structure of answers.",
+    "open": "The target human comparison and reliable blinding remained untested. The recorded runs do not establish an effect on reader judgment.",
+    "checkpoints": [
+      1,
+      5,
+      6,
+      7
+    ]
+  },
+  "store": {
+    "goal": "Give creators a way to offer digital goods and let buyers retrieve them after payment, with clear information about delivery failures and lost keys.",
+    "collaboration": "Megabyte built the checkout. Gaurav tried the buyer’s flow, Vishnu kept a separate payment-evidence check, and Danish reviewed the technical copies.",
+    "decision": "Gaurav found that lost-key information appeared too late. The team repaired and retested the client flow. Later, Vishnu kept the main checkout’s payment evidence open even after a separate review copy passed.",
+    "observed": "The repaired payment review copy passed 19 tests. At the final main version, the recorded 19-test run produced 16 failure reports after the attempted transfer of the repair.",
+    "open": "The main checkout still needed the repair and an independent rerun. The recorded purchases were simulated, and the logs do not establish real creator or buyer use.",
+    "checkpoints": [
+      0,
+      1,
+      6,
+      7
+    ]
+  },
+  "sol": {
+    "goal": "Keep balances and transfers consistent across stopping and restarting a program, as an early step toward an Ethereum-compatible service and external storage.",
+    "collaboration": "Bristin built the local ledger. Hiro helped define restart behavior, Megabyte contributed compatibility checks, and Guru and Danish tested the authorized copy.",
+    "decision": "The team narrowed the work to local persistence after checking the available runtime. Reviewers identified another unresolved rule: reopening an existing ledger needed to be distinguished from deliberately creating a new one.",
+    "observed": "The local suite passed 20 tests with stopping and restarting a process. An independent copy rerun also checked what happened when records changed or requests were repeated.",
+    "open": "The agreed opening and recovery repair had no later execution. The recorded checks cover a local ledger. A network node, external storage and an operator remained outside that evidence.",
+    "checkpoints": [
+      0,
+      2,
+      3,
+      4
+    ]
+  },
+  "life": {
+    "goal": "Help a learner make a specific request, record the reply separately from the work done, and choose what to publish. The broader aim was a portable set of life-skills exercises.",
+    "collaboration": "Shrishti built the scoreboard and exercises. Hiro reviewed permissions. Megabyte tested the saved workflow, while Danish, Lou and Guru reviewed separate parts.",
+    "decision": "Hiro said a second tracker would add overhead to his work. His permission review stayed useful. Megabyte also found that a successful command left out the scope of the recorded evidence. The team repaired both the behavior and the guide.",
+    "observed": "Independent subprocess checks covered the difference between accepting a task and completing it. Reviewers later replayed the revised guide and closed its automated checkpoint.",
+    "open": "A new version of the curriculum with its source notes remained unsaved. The record contains no consenting human pilot or evidence of a cohort using the tool.",
+    "checkpoints": [
+      1,
+      2,
+      3,
+      5
+    ]
+  },
+  "consent": {
+    "goal": "Release a sample session record only when the relevant permission is current. A withdrawal should stop future releases by the program.",
+    "collaboration": "Sachit built the gate. Dhruv supplied independent checks, Moses reviewed the order of operations, and Danish and Guru checked separate saved packages.",
+    "decision": "Reviewers rejected a copy with missing or changed test files. Sachit restored the agreed files. When the later wrapper ran successfully, reviewers still required a complete file inventory for that package.",
+    "observed": "Danish reproduced 59 passes after the original package was repaired. A later independent package ran 97 tests, while its inventory still fell short of the review agreement.",
+    "open": "Connecting the gate to the simulated controller remained open. The tests did not establish independent custody or the persistence of permission across restart.",
+    "checkpoints": [
+      2,
+      3,
+      5,
+      6
+    ]
+  },
+  "reactor": {
+    "goal": "Use reactor observations to propose bounded actions and stop proposing them when readings are unsuitable. The long-term goal was a working Spirulina reactor.",
+    "collaboration": "Bhuvan built the simulated controller. Rajat exchanged independent tests with him. Abhinav contributed a separate monitoring question, and Lou and Danish tested handoff versions.",
+    "decision": "The team kept sensor evidence and controller actions separate. A review copy could run tests but lacked the documented walkthrough script. Bhuvan restored the script and guide in later versions.",
+    "observed": "Lou independently reproduced the simulated fault behavior. Danish ran both documented commands after the handoff repairs. Bhuvan also completed his reciprocal check of Rajat’s controller.",
+    "open": "Restart reset the simulated harvest total. Physical equipment, measured feedback, and continuous protection between calls remained untested.",
+    "checkpoints": [
+      1,
+      2,
+      3,
+      4
+    ]
+  },
+  "audit": {
+    "goal": "Test whether a small model’s internal activity warns of likely mistakes before its answer. The comparison was against simpler measures such as output uncertainty.",
+    "collaboration": "Disha built the measurement and benchmark. Srinitish added evaluation checks, Danish reproduced the packaged result, and Hiro offered design review while keeping the monitor outside his existing workbench.",
+    "decision": "One review copy contained only part of the code. A later package repaired an invalid-input problem. The team kept the weak original warning result visible after both changes.",
+    "observed": "The original warning detected none of 49 held-out errors. Danish reproduced the result in which output uncertainty performed substantially better. A newer set of fixture tests passed separately.",
+    "open": "The fresh-seed benchmark was still unrun. The study did not establish useful warning lead time or an integration that a user could rely on.",
+    "checkpoints": [
+      1,
+      2,
+      3,
+      5,
+      6
+    ]
+  },
+  "evidence": {
+    "goal": "Present evidence cards that show support, disagreements, exclusions and where claims came from. Repeated reports about the same work should remain traceable.",
+    "collaboration": "Amruth built the engine and example cases. Kishore contributed exclusion checks, Pratik supplied a separate evaluation contract, and Gaurav checked what the output counted.",
+    "decision": "Kishore found that some excluded items still affected the direction of a summary. The team repaired this in the engine, then corrected a separate expectation in the tests. A reader copy still had its own direction error.",
+    "observed": "Gaurav independently reproduced the 13-test engine run and added separate accounting checks. The standalone reader export still failed its direction check.",
+    "open": "The reader export needed a repaired run. The study also recorded no combined execution with Pratik’s checker and no validation on real scientific evidence.",
+    "checkpoints": [
+      1,
+      2,
+      3,
+      4
+    ]
+  },
+  "field": {
+    "goal": "Decide whether a sensor record can support a limited monitoring claim. The tool checks the supplied record and tells the consumer when it should hold off.",
+    "collaboration": "Abhinav built the evidence gate. Bhuvan supplied fault tests and the simulated monitoring consumer. Moses checked record provenance, and Bristin reviewed the storage idea.",
+    "decision": "Independent tests first exposed a numeric-input failure. A review copy also omitted its tests. The team repaired both and clarified the written guide where the runtime message was more generic than the example explanation.",
+    "observed": "The gate and monitoring consumer reached a 129-test run with a five-case demonstration. The reproduced checkpoint covered local sample data.",
+    "open": "No real sensor or operator took part. External storage, handling conflicting observations and any action on physical equipment remained outside the checked design.",
+    "checkpoints": [
+      0,
+      2,
+      3,
+      4
+    ]
+  },
+  "adversarial": {
+    "goal": "Give the evidence engine a separate checker that can challenge unsupported certainty, dropped sources and inflated counts.",
+    "collaboration": "Pratik authored the checker and independent cases. Amruth supplied the expected output format and challenged assumptions in the evaluation.",
+    "decision": "They preserved the original expectations so a difference between the checker and the engine could be reported. Permission covered copying a specified version with attribution.",
+    "observed": "The checker accepted eight valid example outputs and rejected 28 deliberately invalid ones. The recorded execution tested the checker against its own controls.",
+    "open": "A combined run with the evidence engine was requested and remained unrecorded. The checker’s self-test could only establish how it graded those examples.",
+    "checkpoints": [
+      0,
+      1,
+      2,
+      3
+    ]
+  },
+  "force": {
+    "goal": "Use approved saved context to suggest a relevant project resource or collaborator. Give a reason and show whether the suggested work is actually available to try.",
+    "collaboration": "Shriyanshi kept the search implementation. Anuj took bounded retrieval checks, Alipat reviewed privacy, and Gaurav asked for a resource that he could run from the instructions.",
+    "decision": "Gaurav made the task about finding and trying a real artifact. The team repaired a smaller ranking failure, but the documented task still required files absent from the handoff.",
+    "observed": "Gaurav independently reproduced 21 passing component tests. The separate task walkthrough then stopped at both advertised entrypoints because the files were missing.",
+    "open": "A repaired runnable handoff was still unpublished at cutoff. The study cannot credit a useful end-to-end discovery task or the intended human comparison.",
+    "checkpoints": [
+      0,
+      2,
+      3,
+      4
+    ]
+  },
+  "qa": {
+    "goal": "Build a simulated delegated task where someone must obtain permission, receive a specific artifact version, run a check and report what happened.",
+    "collaboration": "Gaurav defined what a real independent check should prove. Srinitish built the environment and its receipt system, with Hiro reviewing how permissions were represented.",
+    "decision": "The team treated execution records as part of the acceptance criteria. Srinitish kept a known expected failure in the test suite because the relevant permission check was still incomplete.",
+    "observed": "The second version recorded 28 passing tests and one expected failure. The expected failure identified a real gap in the environment’s checks.",
+    "open": "The agreed repair was still unexecuted. The benchmark did not show that the simulated task represented how real residents delegate work.",
+    "checkpoints": [
+      0,
+      1,
+      2,
+      4
+    ]
+  },
+  "block": {
+    "goal": "Check that a report about blocked work includes its source, permission and evidence type. A question or assertion should retain its actual status in the map.",
+    "collaboration": "Shardul gathered authorized cases. Amruth helped separate evidence from inference. Srinitish implemented the structural checker, and Guru supplied an independent counterexample.",
+    "decision": "Guru showed that an uninspected placeholder could be described as observed evidence. The repair required the report to declare what somebody had actually inspected.",
+    "observed": "An independent run passed 21 tests on the repaired structure. The tool checked the fields and their relationships.",
+    "open": "The authorized three-case map had not been entered and checked in a recorded run. The validator could check consistency of declarations and still accept an invented reference.",
+    "checkpoints": [
+      0,
+      1,
+      2,
+      4
+    ]
+  },
+  "lending": {
+    "goal": "Model a private borrowing and repayment process on sample records, with clear rules on collateral, repeat requests and what may be disclosed.",
+    "collaboration": "Vishnu kept the lending implementation. Bristin supplied accounting and repeat-request tests. Moses checked the disclosure reference. Danish verified a separate technical package.",
+    "decision": "Empty review copies became the immediate delivery issue. Vishnu assembled a runnable copy and supplied the guide. Reviewers also retained a known weakness involving restoration of older records.",
+    "observed": "Danish independently reproduced 26 passing tests and the local lifecycle walkthrough. The package preserved the earlier failed attempts and the unresolved storage behavior.",
+    "open": "A separate interpretation copy stayed empty. Real borrowers, funds, custody and external transactions were outside the recorded tests.",
+    "checkpoints": [
+      1,
+      2,
+      3,
+      5
+    ]
+  },
+  "cost": {
+    "goal": "Compare random and risk-based checks of contribution claims when there is only a limited review budget. Track what each policy costs and what it misses.",
+    "collaboration": "Pratik built the model and memo. Mahboob narrowed the question to project-scoped records, Moses tested the accounting, and Lou tried interpreting the documented result.",
+    "decision": "Moses showed that the first model counted missing or unreviewed items as accepted. Pratik fixed the accounting and kept the scenario where targeting performs worse when the ranking is poor.",
+    "observed": "An independent 22-test run checked the repaired accounting and conserved budget. Lou separately checked the review copy and explained the memo’s limits.",
+    "open": "The resident-reader copy was still empty. Real costs, ranking quality and reviewer accuracy were assumptions in the model.",
+    "checkpoints": [
+      0,
+      1,
+      3,
+      4
+    ]
+  },
+  "unblock": {
+    "goal": "Keep a history of contributions and show whether they still earn credit after a civic issue reopens.",
+    "collaboration": "Mahboob built the contribution records on Aditya’s reporting history. Moses helped define what could be disclosed. Sachit wrote independent checks and Lou and Danish reviewed different copies.",
+    "decision": "The guide originally blurred historical records with current confirmation. It was aligned with the tested behavior. A later handoff also needed the original supporting files restored before independent review.",
+    "observed": "A reopened example kept one historical record and zero current credit. The repaired technical copy passed six tests plus five additional independent checks, and reviewers closed that narrow milestone.",
+    "open": "The dashboard and participant interfaces remained empty. A storage design note was saved while external transport and real contribution validation stayed outside the demonstrated work.",
+    "checkpoints": [
+      2,
+      3,
+      4,
+      5,
+      6
+    ]
+  },
+  "assimilator": {
+    "goal": "Give someone written instructions to import and retrieve sample records while preserving where they came from and respecting withdrawal.",
+    "collaboration": "Shriyanshi built the underlying store. Alipat built the import workflow and privacy tests. Lou checked a review copy, Danish checked the interface, and Gaurav replayed the instructions.",
+    "decision": "Lou found that an error exposed a filename. After the team repaired it, a separate copy still omitted tests mentioned in the guide. Gaurav reported the missing files and waited for the builder’s replacement.",
+    "observed": "Lou independently reran six checks after the privacy repair. The repaired frozen walkthrough later completed both documented commands in Gaurav’s independent copy.",
+    "open": "The exact same instructions-only check remained open for the main record package. The separate copy results cover sample records and do not establish clinical or human use.",
+    "checkpoints": [
+      0,
+      1,
+      2,
+      3
+    ]
+  },
+  "readiness": {
+    "goal": "Check whether a report has the owner, current action, recipient agreement and evidence needed for someone else to take it over.",
+    "collaboration": "Ganesh described the reporting handoff. Shardul wrote the standalone checker. Aditya started the connection to the civic tool. Danish independently checked the component.",
+    "decision": "The team kept the checker advisory so it would not change the issue itself. During review, a failed assertion turned out to be a mistake in the test. Danish corrected it and kept both records.",
+    "observed": "Danish independently reproduced 58 tests and separately reran 38 scope-change checks after the test correction.",
+    "open": "The civic connection had a saved assembly but no execution. Checks on supplied declarations did not establish acceptance by a real recipient.",
+    "checkpoints": [
+      0,
+      1,
+      2,
+      3
+    ]
+  },
+  "recovery": {
+    "goal": "Explore whether a saved key can be recovered from a slightly different brain-signal-derived pattern in an experimental setting.",
+    "collaboration": "Dhruv led the exploratory evaluation. The team kept it separate from Sachit’s consent gate and Rajat’s controller work.",
+    "decision": "Dhruv kept the sample’s uncertain provenance visible and reported the failed evaluation separately from the passing mechanics checks.",
+    "observed": "The synthetic mechanics ran. Recovery worked on the enrollment excerpt and failed on a different window from the same unverified recording.",
+    "open": "A result across independent recordings with verified provenance was still missing. The study did not establish biometric reliability, identity or secrecy.",
+    "checkpoints": [
+      0,
+      1,
+      2,
+      3
+    ]
+  },
+  "fieldmap": {
+    "goal": "Collect authorized accounts of why work was blocked and distinguish a reported obstacle from a tested failure or a question for a later study.",
+    "collaboration": "Shardul collected and wrote up the cases. Amruth reviewed what could be inferred, Srinitish built a separate structural checker, and Gaurav and Hiro supplied narrowly scoped accounts.",
+    "decision": "Amruth asked that Hiro’s authorized account remain framed as self-report. The team changed the interpretation around the quote and kept case counts separate from the number of labels.",
+    "observed": "The saved map assembled three distinct cases, and the revised interpretation received a wording review. The separate validator had its own test evidence.",
+    "open": "The validator was still unrun on the actual map. The three cases can illustrate specific obstacles. A representative sample and causal test were outside this work.",
+    "checkpoints": [
+      1,
+      2,
+      3,
+      4
+    ]
+  },
+  "heatwriting": {
+    "goal": "Explore who can publish or correct heat-related information when offline local notices and central warnings disagree.",
+    "collaboration": "Alipat and Shardul chose a working-group audience and a governance question. Alipat drafted the piece and kept a source ledger, while Shardul reviewed the arrangements and proposed exercise.",
+    "decision": "Shardul asked who would act when reviewers disagree, how a correction would reach an offline display, and how to check whether the tabletop exercise was feasible.",
+    "observed": "The workspace held the draft, sources, assumptions and a fictional exercise. A separate saved review identified specific changes.",
+    "open": "No later draft incorporated those changes, and the tabletop was still unrun. The evidence is a written contribution and its review.",
+    "checkpoints": [
+      0,
+      1,
+      2
+    ]
+  },
+  "qareport": {
+    "goal": "Make independent checks of other teams’ tools easy to inspect. Record the initial failure, the repair and the result from repeating the task.",
+    "collaboration": "Gaurav took bounded tasks from builders and wrote up the results. Shardul helped classify the evidence, and Lou read the consolidated account without reconstructing the private exchanges.",
+    "decision": "Gaurav kept blocked attempts visible beside passing component tests. When a builder gave a hint, he recorded the help so it could not be mistaken for an unassisted walkthrough.",
+    "observed": "The report documented a checkout finding and an independent client retest. Lou identified the original finding and correct retest from the saved report. Later checks separately confirmed the repaired record-import guide.",
+    "open": "The desired two human sessions and complete coverage of all projects were still missing. Lou’s result establishes report readability for that agent reviewer.",
+    "checkpoints": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ]
+  }
+}

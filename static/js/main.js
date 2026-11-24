@@ -8,7 +8,7 @@
 
   let data;
   try {
-    const response = await fetch("static/data/collaboration.json?v=6");
+    const response = await fetch("static/data/collaboration.json?v=7");
     if (!response.ok) throw new Error("Project data unavailable");
     data = await response.json();
   } catch {
@@ -16,15 +16,52 @@
     return;
   }
 
+  const when = (h) => window.Charts ? window.Charts.clock(h) : `${h.toFixed(2)} h`;
+
+  function evidenceCard(checkpoint) {
+    const receipts = checkpoint.receipts.map((receipt) => {
+      const subject = [receipt.entry, receipt.version == null ? "" : `version ${receipt.version}`].filter(Boolean).join(" · ");
+      const facts = [receipt.outcome, receipt.person, `${when(receipt.h)} active time`].filter(Boolean).join(" · ");
+      return `<li><b>${escape(receipt.kind)}</b>${subject ? ` <span>${escape(subject)}</span>` : ""}
+        <span class="receipt-meta">${escape(facts)}${receipt.fingerprint ? ` · source <code>${escape(receipt.fingerprint)}</code>` : ""}</span></li>`;
+    }).join("");
+    return `<article class="project-checkpoint">
+      <h5>${escape(checkpoint.title)}</h5>
+      <p>${escape(checkpoint.detail)}</p>
+      <ul class="project-receipts">${receipts}</ul>
+    </article>`;
+  }
+
+  function projectReview(review) {
+    return `<div class="project-review">
+      <div class="project-finding"><h4>What the record shows</h4><p>${escape(review.observed)}</p></div>
+      <div class="project-review-grid">
+        <div><h4>What they proposed</h4><p>${escape(review.goal)}</p></div>
+        <div><h4>How they divided the work</h4><p>${escape(review.collaboration)}</p></div>
+        <div><h4>What changed along the way</h4><p>${escape(review.decision)}</p></div>
+        <div><h4>Where it stood at cutoff</h4><p>${escape(review.open)}</p></div>
+      </div>
+      <details class="project-evidence">
+        <summary>Evidence behind this analysis</summary>
+        ${review.checkpoints.map(evidenceCard).join("")}
+      </details>
+    </div>`;
+  }
+
   function workshopEntry(entry) {
     const history = entry.versions.length
       ? `<details class="entry-history"><summary>Version history</summary>
-        <ol>${entry.versions.map((version) => `<li><b>Version ${version.number} · ${escape(version.author)}</b>${window.Charts ? ` · ${window.Charts.clock(version.h)}` : ""}<br>
+        <ol>${entry.versions.map((version) => `<li><b>Version ${version.number} · ${escape(version.author)}</b> · ${when(version.h)}<br>
           Files: ${version.added} added, ${version.changed} changed, ${version.removed} removed. Runs: ${version.runs}. Handoffs: ${version.handoffs}.</li>`).join("")}</ol>
       </details>`
       : "<p>No source version was saved in this entry.</p>";
+    const latest = entry.latest_check;
+    const latestOutcome = latest && (latest.successful + latest.unsuccessful > 0
+      ? `<p class="project-latest-check">Latest saved version (${latest.version}) recorded ${latest.successful} successful and ${latest.unsuccessful} unsuccessful exits.</p>`
+      : `<p class="project-latest-check">Latest saved version (${latest.version}) had no recorded run.</p>`);
     return `<details class="project-entry">
       <summary>${escape(entry.title)} <span>${entry.versions.length} saved</span></summary>
+      ${latestOutcome || ""}
       <div class="table-wrap" tabindex="0" aria-label="Scrollable contributor table">
         <table class="compare">
           <thead><tr>
@@ -47,9 +84,11 @@
     const saved = project.entries.reduce((sum, entry) => sum + entry.versions.length, 0);
     const entryCount = project.entries.length;
     detail.innerHTML = `
-      <h3>${escape(project.title)}</h3>
+      <h3 id="project-${escape(project.key)}">${escape(project.title)}</h3>
       <p class="project-purpose">${escape(project.purpose)}</p>
       <p class="project-meta">${escape(project.outcome)} · ${entryCount} workshop ${entryCount === 1 ? "entry" : "entries"} · ${saved} saved versions</p>
+      <p class="project-permalink"><a href="#project-${escape(project.key)}">Link to this project analysis</a></p>
+      ${projectReview(project.review)}
       <h4>Documented contributions</h4>
       <dl class="role-list">
         ${project.people.map((person) => `<div><dt>${escape(person.name)}${person.judge ? " (judge)" : ""}</dt><dd>${escape(person.role)}</dd></div>`).join("")}
@@ -58,13 +97,22 @@
     `;
   }
 
+  function followProjectLink() {
+    const key = location.hash.startsWith("#project-") ? location.hash.slice(9) : "";
+    if (!data.catalog.some((project) => project.key === key)) return false;
+    selectProject(key);
+    window.requestAnimationFrame(() => document.getElementById(`project-${key}`)?.scrollIntoView?.());
+    return true;
+  }
+
   picker.replaceChildren(...data.catalog.map((project) => new Option(project.title, project.key)));
   picker.disabled = false;
   picker.addEventListener("change", () => selectProject(picker.value));
   document.querySelectorAll("[data-project-link]").forEach((link) => {
     link.addEventListener("click", () => selectProject(link.dataset.projectLink));
   });
-  selectProject(data.catalog[0].key);
+  window.addEventListener("hashchange", followProjectLink);
+  if (!followProjectLink()) selectProject(data.catalog[0].key);
   loading.hidden = true;
 
   // The explorer also works if the chart library is unavailable.

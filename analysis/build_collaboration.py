@@ -1,6 +1,6 @@
 """Build the standalone Residency explorer from the frozen project run.
 
-Exports titles, first-name labels, contribution counts and reviewed role labels.
+Exports titles, first-name labels, contribution counts and reviewed evidence.
 Source files, tool payloads, application records and raw messages stay local.
 """
 
@@ -10,6 +10,7 @@ from collections import Counter, defaultdict
 from pathlib import Path
 
 from active_clock import make_active_clock, read_request_times
+from project_evidence import build_evidence, project_reviews
 
 SITE = Path(__file__).resolve().parents[1]
 EVALUATIONS = SITE.parents[1] / "residency_app/experiments/project-completion/evaluations"
@@ -137,32 +138,7 @@ def short_name(name):
     return labels.get(name, name.split()[0].capitalize())
 
 
-def evidence_index(snapshot):
-    index = defaultdict(list)
-
-    def add(kind, key, record, author):
-        index[kind, key].append((record["created_at"], snapshot["names"].get(record[author], "Project record")))
-
-    automated = set()
-    for project in snapshot["projects"]:
-        for run in project["runs"]:
-            add("run", run["id"], run, "author")
-        for revision in project["revisions"]:
-            add("revision", f'{project["id"]}:{revision["revision"]}', revision, "author")
-    for review in snapshot["reviews"]:
-        add("review", review["id"], review, "judge")
-    for workspace in snapshot["workspaces"]:
-        for revision in workspace["revisions"]:
-            add("workspace", f'{workspace["id"]}:{revision["revision"]}', revision, "owner_id")
-            add("workspace", workspace["id"], revision, "owner_id")
-            automated.add(revision.get("message_id"))
-    for message in snapshot["messages"]:
-        if message["id"] not in automated:
-            add("message", message["id"], message, "sender_id")
-    return index
-
-
-def case_traces(active_hours, cases, families, catalog, snapshot):
+def case_traces(active_hours, cases, families, catalog, evidence):
     def marker(turn, title, detail):
         return {"h": round(active_hours(turn["at"]), 4), "person": short_name(turn["who"]),
                 "title": title, "detail": detail}
@@ -176,13 +152,12 @@ def case_traces(active_hours, cases, families, catalog, snapshot):
         for key, (title, project, steps) in CONVERSATIONS.items()
     }
     labour = {row["key"]: row for row in read("labour")["projects"]}
-    evidence = evidence_index(snapshot)
     kinds = {"message": "Conversation", "run": "Code run", "review": "Review",
              "revision": "Source save", "workspace": "Saved work"}
 
     def linked_records(refs):
-        return [(when, who, ref["type"]) for ref in refs
-                for when, who in evidence.get((ref["type"], ref["id"]), [])]
+        return [(when, record["person"], ref["type"]) for ref in refs
+                for when, record in evidence.get((ref["type"], ref["id"]), [])]
 
     def recorded_step(when, who, kind, title, detail):
         return marker({"at": when, "who": who}, title, detail) | {"kind": kind}
@@ -239,6 +214,8 @@ def build():
     families = {family["key"]: family for family in read("narratives")["families"]}
     editorial = {project["key"]: project for project in read("project-overview")["projects"]}
     active_hours, _ = make_active_clock(snapshot["started_at"], read_request_times())
+    records, latest_checks = build_evidence(snapshot, active_hours, short_name)
+    reviews = project_reviews(families, records)
     hours = active_hours(snapshot["cutoff_at"])
     family_for_entry = {project_id: key for key, family in families.items() for project_id in family["project_ids"]}
     activity = {
@@ -306,7 +283,8 @@ def build():
                 "h": round(active_hours(rev["created_at"]), 4),
             })
             previous = files
-        return {"title": project["title"], "versions": versions, "people": people}
+        return {"title": project["title"], "versions": versions, "people": people,
+                "latest_check": latest_checks.get(project_id)}
 
     catalog = []
     for key, purpose in PURPOSES.items():
@@ -315,6 +293,7 @@ def build():
                    "judge": person["name"] in judge_names} for person in overview["collaborators"]]
         catalog.append({"key": key, "title": overview["title"], "purpose": purpose,
                         "outcome": STATUS[family["status"]], "people": people,
+                        "review": reviews[key],
                         "entries": [entry(projects[project_id]) for project_id in family["project_ids"]]})
 
     versioned = [project for project in projects.values() if project["revisions"]]
@@ -343,7 +322,7 @@ def build():
         "conflict_topics": dict(Counter(case["claim_type"] for case in conflicts)),
         "catalog": catalog,
         "activity": {"hours": round(hours, 3), "bins": activity},
-        "traces": case_traces(active_hours, conflicts, families, catalog, snapshot),
+        "traces": case_traces(active_hours, conflicts, families, catalog, records),
     }
 
 
