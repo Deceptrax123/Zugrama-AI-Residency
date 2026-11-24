@@ -13,6 +13,9 @@
     data = await response.json();
   } catch {
     loading.textContent = "The project record could not load. Reload the page to try again.";
+    const outcomeStatus = document.getElementById("outcome-status");
+    outcomeStatus.hidden = false;
+    outcomeStatus.textContent = "The project results could not load. Reload the page to try again.";
     return;
   }
 
@@ -114,6 +117,70 @@
   window.addEventListener("hashchange", followProjectLink);
   if (!followProjectLink()) selectProject(data.catalog[0].key);
   loading.hidden = true;
+
+  function setupOutcomes() {
+    const plot = document.getElementById("outcome-plot");
+    const preview = document.getElementById("outcome-detail");
+    const title = document.getElementById("outcome-project");
+    const evidence = document.getElementById("outcome-evidence");
+    const link = document.getElementById("outcome-project-link");
+    const groups = [
+      { outcome: "Component tested", color: "tested" },
+      { outcome: "Work unfinished", color: "unfinished" },
+      { outcome: "Tests still failing", color: "failing" },
+      { outcome: "Negative result", color: "negative" },
+      { outcome: "Written work", color: "written" },
+    ];
+    let hasSelection = false;
+
+    function showProject(project) {
+      title.textContent = project.title;
+      evidence.textContent = project.review.observed;
+      link.href = `#project-${project.key}`;
+      preview.hidden = false;
+    }
+
+    for (const { outcome, color } of groups) {
+      const projects = data.catalog.filter((project) => project.outcome === outcome);
+      const row = document.createElement("div");
+      row.className = "outcome-row";
+      row.dataset.outcome = color;
+      const label = document.createElement("h4");
+      label.id = `outcome-${color}`;
+      label.textContent = outcome;
+      const count = document.createElement("span");
+      count.textContent = projects.length;
+      label.append(" ", count);
+      const dots = document.createElement("div");
+      dots.className = "outcome-dots";
+      for (const project of projects) {
+        const dot = document.createElement("label");
+        dot.title = project.title;
+        const radio = document.createElement("input");
+        radio.type = "radio";
+        radio.name = "outcome-project";
+        radio.value = project.key;
+        radio.setAttribute("aria-label", project.title);
+        radio.setAttribute("aria-describedby", label.id);
+        radio.addEventListener("change", () => showProject(project));
+        dot.append(radio, document.createElement("span"));
+        dots.append(dot);
+        if (!hasSelection) {
+          radio.checked = true;
+          hasSelection = true;
+          showProject(project);
+        }
+      }
+      row.append(label, dots);
+      plot.append(row);
+    }
+    link.addEventListener("click", (event) => {
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      selectProject(link.hash.slice(9));
+    });
+  }
+
+  setupOutcomes();
 
   // The explorer also works if the chart library is unavailable.
   if (!window.Charts) return;

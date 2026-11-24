@@ -308,6 +308,37 @@ footer { border-top: 1px solid var(--border); margin-top: 40px; padding: 28px 0 
 .study-counts div { padding: 14px 10px 14px 0; }
 .study-counts dt { color: var(--accent-ink); font-size: clamp(1.65rem, 5vw, 2.4rem); line-height: 1.1; font-weight: 650; }
 .study-counts dd { margin: 5px 0 0; font-size: .88rem; color: var(--ink-2); }
+.research-questions { margin: 0; padding-left: 22px; }
+.research-questions li { margin-top: 5px; }
+.outcome-explorer { padding-bottom: 16px; }
+.outcome-row {
+  display: grid; grid-template-columns: 185px minmax(0, 1fr); align-items: start; gap: 8px;
+  padding: 7px 0; border-top: 1px solid var(--grid);
+}
+.outcome-row h4 { margin: 4px 0 0; font-size: .9rem; }
+.outcome-row h4 span { margin-left: 5px; color: var(--ink-2); font-weight: 500; font-variant-numeric: tabular-nums; }
+.outcome-row[data-outcome="tested"] { --outcome-color: var(--s1); }
+.outcome-row[data-outcome="unfinished"] { --outcome-color: var(--s4); }
+.outcome-row[data-outcome="failing"] { --outcome-color: var(--s2); }
+.outcome-row[data-outcome="negative"] { --outcome-color: var(--s5); }
+.outcome-row[data-outcome="written"] { --outcome-color: var(--neutral); }
+.outcome-dots { display: flex; flex-wrap: wrap; }
+.outcome-dots label {
+  position: relative; display: grid; place-items: center; width: 30px; height: 30px;
+  border-radius: 50%; cursor: pointer;
+}
+.outcome-dots input { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+.outcome-dots span { width: 15px; height: 15px; border-radius: 50%; background: var(--outcome-color); }
+.outcome-dots label:hover { background: var(--surface-2); }
+.outcome-dots input:checked + span { outline: 2px solid var(--ink); outline-offset: 3px; }
+.outcome-dots label:has(input:focus-visible) { outline: 2px solid var(--accent-ink); outline-offset: -1px; }
+.outcome-detail { margin-top: 10px; padding: 12px 15px; background: var(--callout); border-radius: 8px; }
+.outcome-detail h4 { margin: 0 0 4px; }
+.outcome-detail p { color: var(--ink-2); font-size: .94rem; margin-bottom: 6px; }
+.outcome-detail a { font-size: .9rem; font-weight: 600; }
+@media (max-width: 600px) {
+  .outcome-row { grid-template-columns: 1fr; gap: 3px; }
+}
 .role-list { margin: 0 0 12px; }
 .role-list > div { display: grid; grid-template-columns: minmax(100px, 1fr) 3fr; gap: 4px 12px; padding: 6px 0; }
 .role-list dt { font-weight: 650; }
