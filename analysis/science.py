@@ -1,4 +1,4 @@
-"""Run audit, hypothesis tests, division of work, directions and selected conversations for Study 2.
+"""Run audit, hypothesis tests, division of work, directions and selected conversations for Zugrama Residency.
 
 Reads the frozen project snapshot, the run database (read-only), the raw request/response
 audit and the retrospective family classification. Writes static/data/science.json.
@@ -25,7 +25,7 @@ from statsmodels.stats.contingency_tables import StratifiedTable
 
 sys.path.insert(0, os.path.dirname(__file__))
 import stats as S  # noqa: E402
-from build_data import ARCHIVE, DB, FAMILIES, SITE, SNAP, WS, category, parse_run  # noqa: E402
+from build_data import DB, FAMILIES, SITE, SNAP, WS, category, parse_run  # noqa: E402
 
 AUDIT = WS / "residency_app/.data/project-completion-private-run2/audit/1104430f67b74d5cb98979900677588f"
 OUT = SITE / "static/data/science.json"
@@ -240,16 +240,11 @@ def main():
         "curve_n": {d: len(v) for d, v in curves.items()},
     }
 
-    # P5 rooms (agent-written messages only)
+    # Room record (agent-written messages only)
     byroom = collections.defaultdict(list)
     for m in M:
         byroom[m["conversation_id"]].append(m)
     size = {r: len({m["sender_id"] for m in ms}) for r, ms in byroom.items()}
-    big = sum(len(ms) for r, ms in byroom.items() if size[r] >= 3)
-    add("P5", "When the task is shared, agents talk in teams rather than pairs", "Share of agent-written messages in rooms with ≥ 3 active members (Wilson CI)",
-        f"{big} of {len(M)} messages ({big / len(M):.0%}); in the networking run the share was 0%", None, len(M),
-        effect=S.r(big / len(M)), ci=[S.r(x) for x in S.wilson(big, len(M))],
-        note="Counts only messages agents wrote; tool receipts that the platform posted under an agent's name are excluded.")
     rs = collections.Counter()
     rr = collections.Counter()
     for r, ms in byroom.items():
@@ -366,23 +361,6 @@ def main():
     out["premature_reads"] = [{"h": b, "n": hb[b][0], "unpublished": hb[b][1], "share": S.r(hb[b][1] / hb[b][0])} for b in hk]
     add("P9", "Requests to read unpublished source decline as the run goes on", "Cochran–Armitage trend in the share of reads refused for unpublished source, by active hour",
         f"{sum(v[1] for v in hb.values())} refusals in {len(pr):,} reads; trend z = {ca['z']:.2f}", ca["p"], len(pr), effect=S.r(ca["z"]))
-
-    # P10 cross-setting
-    A = json.loads(ARCHIVE.read_text())
-    R3 = next(r for r in A["runs"] if r["number"] == 3)
-    net_sent = collections.Counter(m["sender_id"] for m in R3["messages"])
-    key = lambda s: s.lower().replace("mosessampaul", "moses").split()[0]
-    alias = {"louisa": "lou"}
-    pmap = {key(v): k for k, v in names.items()}
-    pts = []
-    for p in A["people"]:
-        k = alias.get(key(p["name"]), key(p["name"]))
-        if k in pmap and pmap[k] in residents:
-            pts.append((net_sent[p["id"]], msgs[pmap[k]], label[pmap[k]]))
-    cs = S.spearman_ci([a for a, _, _ in pts], [b for _, b, _ in pts])
-    add("P10", "Chatty while networking means chatty while building", "Spearman with agent bootstrap (same personas, two runs)",
-        f"ρ = {cs['rho']:.2f} (95% CI {cs['ci'][0]:.2f}–{cs['ci'][1]:.2f})", cs["p"], len(pts), effect=S.r(cs["rho"]), ci=[S.r(x) for x in cs["ci"]])
-    out["cross_setting"] = [{"agent": c, "networking": a, "projects": b} for a, b, c in pts]
 
     # ---------------- directions ----------------
     pa = sorted(Snap["projects"], key=lambda p: p["created_at"])

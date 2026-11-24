@@ -5,13 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="canonical" href="https://deceptrax123.github.io/agent-project-study/">
 <title>Zugrama Residency</title>
-<meta name="description" content="How AI agents found teammates, negotiated responsibilities and tested solutions in a simulated project residency.">
+<meta name="description" content="Follow the projects, people, code versions and disagreements of a simulated AI residency.">
 <meta property="og:title" content="Zugrama Residency">
-<meta property="og:description" content="How AI agents found teammates, negotiated responsibilities and tested solutions in a simulated project residency.">
+<meta property="og:description" content="Follow the projects, people, code versions and disagreements of a simulated AI residency.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="static/css/style.css">
+<link rel="stylesheet" href="static/css/style.css?v=3">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='3' y='3' width='11' height='11' rx='3' fill='%232a78d6'/%3E%3Crect x='18' y='3' width='11' height='11' rx='3' fill='%232a78d6'/%3E%3Crect x='3' y='18' width='11' height='11' rx='3' fill='%232a78d6'/%3E%3Crect x='18' y='18' width='11' height='11' rx='3' fill='%23eb6834'/%3E%3C/svg%3E">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 </head>
@@ -20,13 +20,12 @@
   <div class="wrap">
     <a class="brand" href="#top">Zugrama Residency</a>
     <nav aria-label="Sections">
-      <a href="#abstract">Abstract</a>
-      <a href="#teams">Team formation</a>
-      <a href="#solutions">Solutions and assignments</a>
-      <a href="#labour">Division of work</a>
-      <a href="#results">Testing and review</a>
-      <a href="#methods">Methods</a>
-      <a href="#cite">Cite</a>
+      <a href="#teams">How teams formed</a>
+      <a href="#projects">Projects</a>
+      <a href="#code">Code history</a>
+      <a href="#conflicts">Disagreements</a>
+      <a href="#artifacts">Artifacts</a>
+      <a href="#appendix">Appendix</a>
     </nav>
     <button class="theme-btn" type="button">Dark mode</button>
   </div>
@@ -34,388 +33,202 @@
 
 <main id="top">
 <header class="hero wrap">
-  <p class="venue">Zugrama studies · Study 2</p>
   <h1 class="title">Zugrama Residency</h1>
-  <p class="subtitle">How agents found teammates, divided work, and turned ideas into tested components</p>
+  <p class="subtitle">How AI agents chose collaborators, divided the work, and built software together.</p>
   <p class="authors">Srinitish Srinivasan</p>
   <p class="affil">Agent Network Sandbox · November 2026</p>
   <div class="buttons">
-    <a class="btn" href="#solutions">Read the project cases</a>
-    <a class="btn secondary" href="../agent-networking-study/">Zugrama Networking Event</a>
+    <a class="btn" href="#projects">Explore the projects</a>
+    <a class="btn secondary" href="#artifacts">See what they made</a>
   </div>
 </header>
 
-<div class="wrap reading">
-
-<section id="work-explorer" class="opening-explorer" aria-labelledby="work-explorer-title">
-  <h2 id="work-explorer-title">Who built, and who ran the work?</h2>
-  <p>Most entries with source had one author. Many also had an execution by a different agent.</p>
-  <figure>
-    <div class="fig">
-      <fieldset class="chart-controls" id="work-unit">
-        <legend>Compare by</legend>
-        <label><input type="radio" name="work-unit" value="count" checked> Entry count</label>
-        <label><input type="radio" name="work-unit" value="share"> Share of each group</label>
-      </fieldset>
-      <div class="legend"><span><i style="background:var(--s1)"></i>Outside run</span><span><i style="background:var(--neutral)"></i>No outside run</span></div>
-      <div class="chart" id="fig-builders"></div>
-      <p class="chart-reading" id="work-reading" aria-live="polite">An outside agent ran 33 of the 49 single-author entries and 6 of the 23 multi-author entries.</p>
-    </div>
-    <figcaption>The 72 entries shown had a source revision. An outside run came from someone who authored no source on that entry. Judges and all sandboxed outcomes are included.</figcaption>
-  </figure>
-</section>
-
-<section id="abstract">
-  <h2>Abstract</h2>
-  <div class="abstract">
-    <p>How do agents with different project goals find a reason to work together? In Zugrama Residency, 25 GPT-6.1 Sol resident agents entered a shared workshop with goals and skill summaries drawn from residency applications. Three judge agents evaluated the work. The residents chose their own partners and responsibilities over 7.6 active hours.</p>
-    <p>We analysed 1,780 agent-written messages, 209 source revisions, 577 sandboxed executions and 81 reviews. Rooms with three to five active speakers held 62% of messages. Of 72 project entries with source, 23 had multiple authors. Another 33 had one author and an execution by someone outside the author group. Fifteen agents revised a project someone else created, and two residents accounted for 57 of the 93 resident peer executions.</p>
-    <p>In the logs, teams formed around overlapping problems, reciprocal offers and components someone else could use. Agents combined two civic-reporting ideas around one workflow, narrowed a sign-language concept to a reusable text adapter, and negotiated a file-by-file handoff for a memory approval tool. The first two produced tested components. The third reached an explicit agreement with the combined implementation still pending at cutoff. These outcomes distinguish an agreed division of work from a delivered and tested solution.</p>
-  </div>
-</section>
-
-<section id="questions">
-  <h2>Research questions</h2>
-  <ol class="rq">
-    <li><b>Team formation.</b><span>Which shared goals or complementary needs brought agents together?</span></li>
-    <li><b>Solution discovery.</b><span>How did they narrow broad project ideas into components that someone could build or use?</span></li>
-    <li><b>Task assignment.</b><span>Who proposed responsibilities, who accepted them, and which commitments reached a source revision or execution?</span></li>
-    <li><b>Division of work.</b><span>How widely were implementation and testing distributed across agents and projects?</span></li>
-  </ol>
+<div class="wrap">
+<section id="abstract" class="study-intro">
+  <p class="lead">Ganesh and Aditya arrived with similar ideas for reporting local problems. Ganesh proposed building one workflow together. Within minutes, four agents had divided up the reporting logic, the submission screen, contribution records and independent testing.</p>
+  <p>In this simulation, 25 GPT-6.1 Sol resident agents brought their own project goals to a shared workshop and chose whom to work with. Three judge agents reviewed what they built. We followed 7.6 active hours of proposals, source versions, handoffs and test runs.</p>
+  <dl class="study-counts">
+    <div><dt>209</dt><dd>source versions saved</dd></div>
+    <div><dt>23</dt><dd>workshop entries with multiple authors</dd></div>
+    <div><dt>24</dt><dd>explicit source handoffs</dd></div>
+  </dl>
 </section>
 
 <section id="teams">
-  <h2>Team formation</h2>
-  <p>Residents brought individual project goals into a workshop that also offered three village tasks: reporting water, waste and maintenance issues, coordinating shared tools or volunteer time, and retrieving local knowledge offline. A concrete overlap gave agents a reason to open a room and ask for a contribution. The civic team, for example, began when Ganesh saw that two proposals covered the same reporting workflow and asked their authors to build one small slice together.</p>
-  <p>Group conversation was common. Of 103 rooms, 37 had three to five agents who wrote messages. Those rooms held 1,101 of 1,780 agent-written messages. The network below shows where agents exchanged ideas and where judges and testers connected work across groups.</p>
-  <figure>
-    <div class="fig">
-      <p class="chart-title">Who wrote in the same rooms?</p>
-      <div class="legend"><span><i style="background:var(--s1);border-radius:50%"></i>Resident</span><span><i style="background:var(--s2);border-radius:50%"></i>Judge</span></div>
-      <div class="chart" id="fig-network"></div>
-    </div>
-    <figcaption>Two agents are linked if both wrote in a room. Edge weights add the room’s message count divided by the number of other speakers. Node size shows messages written. Among 25 residents, 82 of 300 possible pairs wrote in the same room.</figcaption>
-  </figure>
-  <p>The <a href="../agent-networking-study/">Zugrama Networking Event</a> reached 202 of 210 possible pairs and stayed in two-person rooms. Here, agents used larger rooms to coordinate specific deliverables. The studies also differed in scheduling, roles and available tools, so the comparison describes the two settings.</p>
-</section>
-
-<section id="solutions">
-  <h2>How teams found solutions and assigned work</h2>
-  <p>These cases follow an idea from the first offer through the division of work to the last observable result. They were selected to show different ways of working together, including a handoff that was still open when the run ended.</p>
+  <h2>How teams formed</h2>
   <div class="evidence-grid">
-    <article class="case">
-      <h3>Two civic proposals became one reporting workflow</h3>
-      <p>Ganesh invited the others to amend the scope and choose a contribution. Aditya took the reporting lifecycle and replay logic, then asked Mahboob to choose between the kiosk interface and contribution receipts. Mahboob chose receipts. Ganesh took submission and ingest, and Gaurav took independent QA.</p>
-      <details class="case-evidence">
-        <summary>Outcome and sources</summary>
-        <p>The shared core passed independent checks and four simulated civic tasks. The dashboard still had open persistence cases, and village use remained untested.</p>
-        <p class="source-links"><a href="https://zugrama-project-evaluations.smudge0110.chatgpt.site/#experiment=final&amp;view=source&amp;source=message%3Ac2a46c9f8f354a0b8067f9cb8c50d4ab">Invitation</a> · <a href="https://zugrama-project-evaluations.smudge0110.chatgpt.site/#experiment=final&amp;view=source&amp;source=message%3A322787402ede4b81a2d188985f456757">Task proposal</a> · <a href="https://zugrama-project-evaluations.smudge0110.chatgpt.site/#experiment=final&amp;view=projects&amp;project=civic">Project record</a></p>
+    <article class="case" id="civic-case">
+      <h3>Two reporting ideas became one tool</h3>
+      <p>Ganesh noticed that Pukaar and Zu-Grama both let residents report a local problem. He invited the other agents to build one shared workflow and choose what to contribute.</p>
+      <details class="case-evidence" open>
+        <summary>Who did what</summary>
+        <dl class="role-list">
+          <div><dt>Ganesh</dt><dd>Built the submission, dashboard and local storage pieces.</dd></div>
+          <div><dt>Aditya</dt><dd>Built the chain of reports, repair claims, confirmations and reopenings.</dd></div>
+          <div><dt>Mahboob</dt><dd>Chose to build contribution records and left the interface to Ganesh.</dd></div>
+          <div><dt>Gaurav</dt><dd>Ran independent checks from the perspective of someone using the tool.</dd></div>
+        </dl>
+        <p>The shared core passed four simulated civic cases. The dashboard’s connection to permanent storage still needed checks.</p>
       </details>
+      <p class="source-links"><a href="#projects" data-project-link="civic">See the versions and contributors</a> · <a href="#civic-artifact">See the test output</a></p>
     </article>
-    <article class="case">
-      <h3>A reciprocal offer produced a shared record store</h3>
-      <p>Shriyanshi offered to build a local ingestion component in exchange for privacy review. Alipat proposed a split: Shriyanshi would implement ingestion and its tests, while Alipat would handle schema review, independent acceptance cases and a command-line demo. Shriyanshi explicitly accepted.</p>
+    <article class="case" id="ingest-case">
+      <h3>A trade turned into a shared record store</h3>
+      <p>Shriyanshi asked Alipat to review how a project handled consent and offered to build a record importer in return. Alipat proposed a division of work, and Shriyanshi accepted it.</p>
       <details class="case-evidence">
-        <summary>Outcome and sources</summary>
-        <p>Both contributed to one package using synthetic records. A collaborator reran 50 tests successfully. The separate workflow described in the README still awaited an independent run.</p>
-        <p class="source-links"><a href="https://zugrama-project-evaluations.smudge0110.chatgpt.site/#experiment=final&amp;view=source&amp;source=message%3A15e3db0670af4c508ec1f2a4233bb0c4">Task proposal</a> · <a href="https://zugrama-project-evaluations.smudge0110.chatgpt.site/#experiment=final&amp;view=source&amp;source=message%3A30d0500c728d457ca29d3f35448d0f36">Acceptance</a> · <a href="https://zugrama-project-evaluations.smudge0110.chatgpt.site/#experiment=final&amp;view=source&amp;source=run%3Aad37e06b817a421fa11b6c77ea8bf148">Execution record</a></p>
+        <summary>Who did what</summary>
+        <dl class="role-list">
+          <div><dt>Shriyanshi</dt><dd>Built the importer and wrote tests for storing and correcting sample records.</dd></div>
+          <div><dt>Alipat</dt><dd>Defined the privacy requirements, wrote separate acceptance tests and built the command-line demo.</dd></div>
+        </dl>
+        <p>The collaborators put both sets of work into one package. A rerun passed 50 tests, with the instructions-only walkthrough still pending.</p>
       </details>
+      <p class="source-links"><a href="#projects" data-project-link="ingest">See the versions and contributors</a></p>
     </article>
-    <article class="case">
-      <h3>A smaller text adapter made reuse possible</h3>
-      <p>Tuhin lacked validated sign-language assets and proposed a narrower contribution to Anuj’s memory project: an adapter that preserves Hindi and English source text and flags unsupported input. Tuhin built and tested the adapter. Anuj agreed to integrate it, requested permission to copy the exact version and ran tests in the destination.</p>
+    <article class="case" id="sign-case">
+      <h3>A smaller problem made reuse possible</h3>
+      <p>Tuhin’s sign-language project needed validated examples. Tuhin proposed a smaller task to Anuj: make an adapter that keeps Hindi and English text intact when it enters the memory tool.</p>
       <details class="case-evidence">
-        <summary>Outcome and sources</summary>
-        <p>The original adapter passed 12 tests, and the attributed integration passed 16. The result covers text intake and local memory integration. Sign recognition and speech inference remained outside the tested scope.</p>
-        <p class="source-links"><a href="https://zugrama-project-evaluations.smudge0110.chatgpt.site/#experiment=final&amp;view=source&amp;source=message%3A71b96c8e0f904a71bf205f02c107de10">Adapter proposal</a> · <a href="https://zugrama-project-evaluations.smudge0110.chatgpt.site/#experiment=final&amp;view=source&amp;source=message%3A0fc9c6f71c6d40a089b80828752ee299">Handoff permission</a> · <a href="https://zugrama-project-evaluations.smudge0110.chatgpt.site/#experiment=final&amp;view=source&amp;source=run%3Ac98b8052ed654d3fb5474f19319ff1d8">Destination execution</a></p>
+        <summary>Who did what</summary>
+        <dl class="role-list">
+          <div><dt>Tuhin</dt><dd>Built the adapter, wrote its tests and approved copying that version.</dd></div>
+          <div><dt>Anuj</dt><dd>Connected it to the memory project and ran a new suite on the receiving copy.</dd></div>
+        </dl>
+        <p>The adapter passed 12 tests on its own and 16 in the receiving copy. These checks covered text intake and local memory.</p>
       </details>
+      <p class="source-links"><a href="#projects" data-project-link="sign">See the versions and contributors</a> · <a href="#text-artifact">See a test example</a></p>
     </article>
-    <article class="case">
-      <h3>A precise reassignment came too late for integration</h3>
-      <p>Anuj supplied a local memory component and Hiro supplied an approval gate. Aditya reviewed the memory contract, and Gaurav reviewed the acceptance tests. The remaining task was to connect the two components so that a user could preview and approve selected history.</p>
+    <article class="case" id="export-case">
+      <h3>A clear split still left the pieces apart</h3>
+      <p>Anuj had a local memory tool. Hiro offered to build an approval step where someone could preview what the tool was about to send.</p>
       <details class="case-evidence">
-        <summary>Outcome and sources</summary>
-        <p>With about a minute left in the record, Hiro asked Anuj to take the integration factory and packaging. Anuj accepted, and Hiro kept the workbench and CLI. The run ended before a combined source revision or execution appeared.</p>
-        <p class="source-links"><a href="https://zugrama-project-evaluations.smudge0110.chatgpt.site/#experiment=final&amp;view=source&amp;source=message%3A82b0cba6993740e4b80b86dea90a4cce">Reassignment</a> · <a href="https://zugrama-project-evaluations.smudge0110.chatgpt.site/#experiment=final&amp;view=source&amp;source=message%3Aa29413f4798c42ff8f8bbe7c5bfcece6">Acceptance</a> · <a href="https://zugrama-project-evaluations.smudge0110.chatgpt.site/#experiment=final&amp;view=projects&amp;project=export">Project record</a></p>
+        <summary>Who did what</summary>
+        <dl class="role-list">
+          <div><dt>Anuj</dt><dd>Built the memory component and supplied tests for connecting it to the gate.</dd></div>
+          <div><dt>Hiro</dt><dd>Built the approval gate and took the workbench and command-line interface.</dd></div>
+          <div><dt>Aditya and Gaurav</dt><dd>Reviewed the interface and the acceptance tests, respectively.</dd></div>
+        </dl>
+        <p>Near cutoff Hiro asked Anuj to take the integration setup. Anuj accepted the file split. The individual components were in the workshop when the run ended, and there was no run of them together.</p>
       </details>
+      <p class="source-links"><a href="#projects" data-project-link="export">See the versions and contributors</a></p>
     </article>
   </div>
 </section>
 
-<section id="labour">
-  <h2>Division of work</h2>
-  <article class="finding" id="rq3">
-    <p>Forty-nine of the 72 project entries with source had one author. On 33 of those 49, another agent ran the code. Across the full set, 15 agents contributed 35 revisions to entries they had not created. The workshop also recorded 24 explicit source handoffs across 20 entries, each announcing a specific revision to a room.</p>
-    <p>Testing was especially concentrated. Gaurav and Megabyte ran 57 of the 93 resident peer checks, while the three judges ran another 251 peer checks. Resident peer testing had a Gini coefficient of 0.75, compared with 0.28 for source revisions and 0.18 for messages. The activity profiles below show how building, contributing and testing clustered across residents.</p>
-    <div class="stat-line" id="sl-p6"></div>
-    <figure>
-      <div class="fig">
-        <p class="chart-title">Each agent's activity mix</p>
-        <p class="chart-sub">share of the agent's own actions in each role · grouped by archetype</p>
-        <div class="chart" id="fig-roles"></div>
-      </div>
-      <figcaption><b>Emergent roles.</b> "Build own" = revisions to projects the agent created. "Build others'" = revisions to someone else's project. "Test own/others'" = executions. "Talk" = agent-written messages. "Review" = judge reviews. Rows are grouped by archetype. Hover a cell for counts.</figcaption>
-    </figure>
-    <figure>
-      <div class="fig">
-        <div><p class="chart-title">How concentrated is each kind of work?</p><p class="chart-sub">Lorenz curves over the 25 residents</p><div class="legend"><span><i class="line" style="background:var(--s1)"></i>Messages</span><span><i class="line" style="background:var(--s3)"></i>Revisions</span><span><i class="line" style="background:var(--s2)"></i>Peer test runs</span></div><div class="chart" id="fig-lorenz"></div></div>
-      </div>
-      <figcaption>Cumulative shares of work across the 25 residents. Testing for other projects was the activity most concentrated in a few agents.</figcaption>
-    </figure>
-    <figure>
-      <div class="fig fig-row">
-        <div><p class="chart-title">Share of agent-written messages by room size</p><div class="legend"><span><i style="background:var(--s1)"></i>Projects</span><span><i style="background:var(--s2)"></i>Networking (Study 1)</span></div><div class="chart" id="fig-roomsize"></div></div>
-        <div><p class="chart-title">Messages vs revisions (residents)</p><p class="chart-sub">dot size = peer test runs</p><div class="chart" id="fig-talkbuild"></div></div>
-      </div>
-      <figcaption>Left, the share of messages by number of speakers per room in each study. Right, among residents, message and revision counts are positively associated (Spearman ρ = 0.65, 95% CI 0.29–0.86).</figcaption>
-    </figure>
-  </article>
-</section>
-
-<section id="directions">
-  <h2>How the work changed over time</h2>
-  <article class="finding" id="rq4">
-    <p><b>From new entries to revisions.</b> Agents created 47 of 87 entries in the first active hour. Every first-half-hour revision went to an entry less than 30 minutes old. By hour five, almost every revision went to an older entry (Cochran–Armitage z = −8.2).</p>
-    <p><b>Fewer premature reads.</b> Requests reached unpublished work less often as the run progressed. 793 of 14,582 project reads were refused because the source had not been published yet. The refusal share fell from 6–8% in the first four hours to 3–5% afterwards (z = −7.2).</p>
-    <div class="stat-line" id="sl-p11"></div>
-    <figure>
-      <div class="fig fig-row">
-        <div><p class="chart-title">Revisions per half hour</p><div class="legend"><span><i style="background:var(--s4)"></i>to projects &lt; 30 min old</span><span><i style="background:var(--s1)"></i>to older projects</span></div><div class="chart" id="fig-explore"></div></div>
-        <div><p class="chart-title">Reads refused: source not published yet</p><p class="chart-sub">share of project reads, per active hour</p><div class="chart" id="fig-premature"></div></div>
-      </div>
-      <figcaption><b>Direction of effort over active time.</b></figcaption>
-    </figure>
-    <p><b>Coordination dominated the chat.</b> The message topic model surfaced recurring language about interfaces, permissions, handoffs, receipts and review. The cases above show what that language did in particular projects: agents set file boundaries, requested a version they could execute, and agreed on which evidence would close the task.</p>
-    <figure>
-      <div class="fig">
-        <p class="chart-title">Share of messages per topic, per active hour</p>
-        <div class="chart" id="fig-topics"></div>
-      </div>
-      <figcaption><b>What agents talked about.</b> TF-IDF + NMF with k = 8 and seed 1. Labels are assigned by keyword rules from each component's top terms, which are shown under each title.</figcaption>
-    </figure>
-    <figure>
-      <div class="fig">
-        <p class="chart-title">Where the 29 project families ended (earlier audit's classification)</p>
-        <div class="chart" id="fig-outcomes"></div>
-      </div>
-      <figcaption><b>Outcomes.</b> From the earlier audit's retrospective review. A "working component" is a tested, bounded piece, not a completed original project.</figcaption>
-    </figure>
-    <p>For the 15 residents observed in both studies, the association between message counts was imprecise (Spearman ρ = −0.46, 95% CI −0.84 to 0.16). The two settings offered different tasks and opportunities to contribute.</p>
-    <figure>
-      <div class="fig"><p class="chart-title">Messages: networking (Study 1, Run 3) vs projects</p><div class="chart" id="fig-cross"></div></div>
-      <figcaption><b>Same personas, different settings</b> (n = 15 residents; judges excluded because their role changed).</figcaption>
-    </figure>
-  </article>
-</section>
-
-<section id="results">
-  <h2>Testing, feedback and revision</h2>
-
-  <article class="finding" id="rq1">
-    <div class="f-label">Peer testing</div>
-    <p class="claim">Changing the check surfaced more failures in the raw counts. The difference was uncertain across projects.</p>
-    <p>We labelled each of the 577 executions by who ran it and what it ran. Builders’ own runs failed 18.9% of the time. Peer replications fail 3.8% of the time and peer new probes 14.2%. Fisher's test on these counts is significant (OR 4.2). But runs are not independent: the same project is checked many times. When we resample whole projects, the 95% interval for the difference runs from −1.8 to +17.2 points. Of 266 peer runs on a revision the builder had already passed, 6 failed. Three of those failures were missing files.</p>
-    <div class="stat-line" id="sl-p1"></div>
-    <figure>
-      <div class="fig">
-        <p class="chart-title">Share of executions that failed, with 95% Wilson intervals</p>
-        <div class="chart" id="fig-verify"></div>
-      </div>
-      <figcaption><b>Where failures surface.</b> "Peer" means any agent other than the project's creator, judges included. Hover for counts and how many failures were missing files.</figcaption>
-    </figure>
-    <p>Do residents check better than judges? Resident peer runs failed 11.8% of the time against 5.2% for judges (crude OR 2.5, p = 0.053). But residents wrote new probes for 54% of their checks and judges for 22%. After stratifying by check type, the pooled odds ratio was 1.6 (95% CI 0.70–3.65).</p>
-    <div class="stat-line" id="sl-p3"></div>
-    <figure>
-      <div class="fig">
-        <p class="chart-title">Failure rate by runner role and check type</p>
-        <div class="chart" id="fig-verify-role"></div>
-      </div>
-      <figcaption><b>Failures by runner role and check type.</b> Judges ran 251 of the 344 peer executions, mostly replications.</figcaption>
-    </figure>
-  </article>
-
-  <article class="finding" id="rq2">
-    <div class="f-label">Judge feedback</div>
-    <p class="claim">A revision was more likely to follow a “changes requested” review than a “needs evidence” review.</p>
-    <p>The judges published 81 reviews of 29 projects and accepted none: 62 said "needs evidence", 17 said "changes requested" and 2 said "demo ready". A revision followed 14 of 17 “changes requested” reviews (82%) and 14 of 62 “needs evidence” reviews (23%) within 30 active minutes. That raw gap could just reflect projects that were about to be revised anyway, so we drew 40 random moments in each reviewed project's active life and asked the same question. The baseline is 46%. Change requests sit well above it. “Needs evidence” sits below it. Judges chose the review wording, and we did not measure how builders spent the intervening time.</p>
-    <div class="stat-line" id="sl-p4"></div>
-    <figure>
-      <div class="fig fig-row">
-        <div><p class="chart-title">Revised within 30 minutes of …</p><p class="chart-sub">share with 95% Wilson interval</p><div class="chart" id="fig-follow"></div></div>
-        <div><p class="chart-title">Time to the next revision</p><p class="chart-sub">cumulative share of reviews, active minutes</p><div class="legend"><span><i class="line" style="background:var(--s2)"></i>Changes requested</span><span><i class="line" style="background:var(--s1)"></i>Needs evidence</span></div><div class="chart" id="fig-curves"></div></div>
-      </div>
-      <figcaption><b>Review wording and follow-through.</b> Left, the dashed line marks the matched random-time baseline. Right, the share of reviews that had been followed by a revision, as time passes. Curves end at the share of reviews ever followed by a revision.</figcaption>
-    </figure>
-    <figure>
-      <div class="fig">
-        <p class="chart-title">Review decisions by judge</p>
-        <div class="legend"><span><i style="background:var(--s1)"></i>Needs evidence</span><span><i style="background:var(--s2)"></i>Changes requested</span><span><i style="background:var(--s3)"></i>Demo ready</span></div>
-        <div class="chart" id="fig-judges"></div>
-      </div>
-      <figcaption>All three judges defaulted to "needs evidence", whatever their remit.</figcaption>
-    </figure>
-  </article>
-</section>
-
-<section id="discussion">
-  <h2>Discussion</h2>
-  <p>Teams formed around a specific need. The civic team reduced duplicate work by agreeing on one common workflow. The record-store pair traded implementation for review. The text adapter worked across projects because the supplier defined a usable boundary and the recipient tested it after copying.</p>
-  <p>Much of the division of work was between authors and reviewers. A project could have one source author and still receive useful outside testing. Conversely, the memory approval team named owners for all remaining files and supplied acceptance tests, yet never recorded an execution of the combined version. An assessment of collaboration therefore needs the assignment, the artifact it produced, and the scope of the test.</p>
-  <p>Together with the <a href="../agent-networking-study/">Zugrama Networking Event</a>, these records show how the same model could use conversation for different purposes. Networking made it possible to find partners and develop ideas across topics. The workshop made more of the work visible through specific responsibilities, versioned handoffs and execution records.</p>
-</section>
-
-<section id="methods">
-  <h2>Methods</h2>
-  <div class="setup-grid">
-    <div class="case"><span class="pill">Population</span><h4>25 residents + 3 judges</h4><p>Residents were seeded with stated goals, sourced skill summaries and proposed acceptance checks. The judges had fixed remits: <b>Lou</b> (village usefulness), <b>Danish</b> (technical correctness and privacy) and <b>Guru</b> (delivery and scope). All agents ran GPT-6.1 Sol with high reasoning.</p></div>
-    <div class="case"><span class="pill">Workshop</span><h4>Versioned code + sandbox</h4><p>Agents could create, write, run, hand off and share projects. Runs execute in a network-isolated sandbox and return receipts bound to source hashes. A round-robin scheduler gave each agent about 275 model calls.</p></div>
-    <div class="case"><span class="pill">Clock</span><h4>7.6 active hours</h4><p>All elapsed times use the active clock.</p></div>
-  </div>
-  <div class="stats" id="run-stats"></div>
-  <dl class="methods">
-    <dt>Inclusion</dt>
-    <dd>We include agent-written messages only. Of 2,731 messages in the record, 951 were posted by the platform under an agent's name: 433 execution receipts, 311 revision notices, 71 review notices and 136 workspace or whiteboard publications. All executions, revisions and reviews are included.</dd>
-    <dt>Measures</dt>
-    <dd>
-      <ul>
-        <li><i>Room size</i> counts distinct speakers with an agent-written message. <i>Co-authorship</i> counts distinct authors of committed source revisions on the same entry.</li>
-        <li><i>Outside execution</i> is a sandboxed run by an agent outside the set of everyone who authored source for that entry by cutoff. This is a stricter measure than the non-creator runs used in the verification tests.</li>
-        <li><i>Source handoff</i> counts successful explicit handoff calls for a specific revision. Task agreements and cross-entry reuse are traced from messages and artifacts in selected cases.</li>
-        <li><i>Self run</i>: an execution by the project's creator.</li>
-        <li><i>Peer replication</i>: a non-creator runs a command string already run on that project.</li>
-        <li><i>Peer new probe</i>: a non-creator runs a command never run on that project before.</li>
-        <li><i>Failure</i>: a non-zero exit or <code>ok: false</code>.</li>
-        <li><i>Acted on</i>: a new revision of the project within 30 active minutes of a review.</li>
-        <li><i>Role profile</i>: each agent's counts of own-project revisions, revisions to others' projects, self runs, peer runs, messages and reviews. The agent's archetype is the role whose share most exceeds the resident average.</li>
-      </ul>
-    </dd>
-    <dt>Statistics</dt>
-    <dd>
-      <ul>
-        <li>Wilson intervals for proportions.</li>
-        <li>Fisher's exact test with Woolf intervals on odds ratios.</li>
-        <li>A cluster bootstrap over projects (3,000 resamples) for verification differences.</li>
-        <li>A Mantel–Haenszel pooled odds ratio stratified by check type.</li>
-        <li>A matched-time null for review follow-through: 40 random time points per reviewed project, drawn within that project's active life.</li>
-        <li>A directed configuration null (2,000 draws) for reciprocal testing.</li>
-        <li>An agent-level bootstrap for Gini coefficients and Spearman correlations.</li>
-        <li>Cochran–Armitage tests for trends over active hours.</li>
-      </ul>
-      Benjamini–Hochberg adjustment across the 8 tests that produce a p-value.</dd>
-    <dt>Reproducibility</dt>
-    <dd><code>analysis/build_data.py</code> builds the descriptive figures and <code>analysis/science.py</code> builds the audit, tests, division of work, topics and conversation selection. Both read the frozen sources only. Seeds are fixed, and no resident code is executed.</dd>
-  </dl>
-  <div class="buttons" aria-label="Data and code">
-    <a class="btn secondary" href="https://github.com/Deceptrax123/Agent-network-sandbox-pilot"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>Sandbox code</a>
-    <a class="btn secondary" href="static/data/science.json" download>Analysis results (JSON)</a>
-    <a class="btn secondary" href="static/data/projects.json" download>Figure data (JSON)</a>
-    <a class="btn secondary" href="https://github.com/Deceptrax123/agent-project-study/tree/main/analysis">Analysis scripts</a>
+<section id="projects">
+  <h2>What each project did</h2>
+  <p>Explore 29 projects and lines of work. Each collects related workshop entries, including separate testing copies. Open an entry to see who saved code, ran it, reviewed it or handed it over.</p>
+  <div class="fig project-explorer">
+    <label for="project-choice">Choose a project</label>
+    <select id="project-choice" disabled><option>Loading projects…</option></select>
+    <p id="project-loading" role="status">Loading the project record…</p>
+    <div id="project-detail"></div>
   </div>
 </section>
 
-<section id="audit">
-  <h2>Run audit</h2>
-  <p>We checked whether the run happened as designed by comparing four sources: the scheduler (when each agent was called), the raw model requests and responses, the usage ledger and the platform's records of messages, tools and projects.</p>
+<section id="code">
+  <h2>How code moved between agents</h2>
+  <p>Agents saved numbered versions inside the workshop. A save recorded the author and the resulting source snapshot. A handoff pointed someone in the room to one specific version, sometimes with its test result. These are workshop events. The logs contain no Git push events.</p>
   <figure>
     <div class="fig">
-      <p class="chart-title">Model calls per agent over active time</p>
-      <div class="legend"><span><i style="background:var(--s1)"></i>model call</span><span><i style="background:var(--s2)"></i>not scheduled (&gt; 20 active min)</span></div>
-      <div class="chart" id="fig-lanes"></div>
+      <p class="chart-title">First saves and later edits</p>
+      <div class="chart" id="fig-publication"></div>
     </div>
-    <figcaption><b>The run as the scheduler saw it.</b> Round-robin scheduling gave 27 agents 271–282 calls each. Abhinav's worker stopped at 3.0 active hours and was absent for 4.6 of 7.6 hours. Hover over a row for details.</figcaption>
+    <figcaption>Agents opened 87 workshop entries. Source was saved on 72 of them, followed by 137 edits. Entries include original projects, components, and copies made for review.</figcaption>
   </figure>
-  <div class="audit-grid" id="audit-items"></div>
+  <dl class="role-list code-record">
+    <div><dt>Edits by collaborators</dt><dd>15 agents saved 35 versions on entries someone else opened. On 23 of the 72 entries with source, more than one agent saved a version.</dd></div>
+    <div><dt>Sharing and handoffs</dt><dd>Agents handed over specific versions 24 times across 20 entries. Six entries moved from private to room access. One entry with source was marked public inside the simulator at cutoff.</dd></div>
+    <div><dt>Checking the code</dt><dd>The workshop recorded 577 executions. A run is counted whether it passed or failed. Opening an entry, saving code and running someone’s code are shown separately in the project explorer.</dd></div>
+  </dl>
+</section>
+
+<section id="conflicts">
+  <h2>Where collaborators disagreed</h2>
+  <p>Some disputes were about code and test expectations. Others were about whether a proposed feature was worth building or what a passing test entitled the team to claim.</p>
+  <div class="evidence-grid conflict-grid">
+    <article class="case">
+      <h3>Which should change, the code or the test?</h3>
+      <p>A civic dashboard test expected a restarted report to say “submitted.” The reporting core called that state “reported.” Ganesh kept the core behavior, corrected the test expectation and reran the suite. The previous failure stayed in the record.</p>
+    </article>
+    <article class="case">
+      <h3>Who would use the proposed feature?</h3>
+      <p>Hiro and Anuj had pieces for sharing approved memories, but Aditya could find no demonstrated need for a memory lookup in the civic workflow. He declined that integration. The civic team continued with the reporting work it could justify.</p>
+    </article>
+    <article class="case">
+      <h3>Can a passing component close the review?</h3>
+      <p>Danish closed a technical review of the civic contribution component after the scoped checks passed. Guru asked for those checks to be separated from evidence about how the whole tool would be used. The broader review still asked for evidence.</p>
+    </article>
+    <article class="case">
+      <h3>Does another dependency belong in the project?</h3>
+      <p>The algae-controller team discussed adding a storage adapter. Bhuvan kept the exchange local for the synthetic controller tests. The team kept the design review as a contribution and left the storage integration outside the agreed scope.</p>
+    </article>
+  </div>
   <figure>
-    <div class="fig"><div class="table-wrap"><table class="compare" id="tbl-audit"></table></div></div>
-    <figcaption><b>Integrity checks.</b> Token counts in the raw responses match the ledger exactly. Every call without a recorded cost is a provider error.</figcaption>
+    <div class="fig">
+      <p class="chart-title">What ten documented disagreements were about</p>
+      <div class="chart" id="fig-conflicts"></div>
+    </div>
+    <figcaption>Four concerned scope, three concerned what counted as evidence, two concerned whether a feature was useful, and one concerned a technical claim. These ten cases were selected from the record to show different kinds of disagreement.</figcaption>
   </figure>
-  <div class="prior"><span class="tag">Corrects earlier numbers</span>Our first draft and the earlier automated audit counted all 2,731 chat messages as agent talk. Excluding the 951 platform receipts changes several results:</div>
-  <ul>
-    <li>Median words per message: 47 → 55.</li>
-    <li>Judges' message counts: 171–204 → 116–142.</li>
-    <li>Talk–build correlation: 0.79 → 0.65.</li>
-    <li>Cross-setting correlation: −0.36 → −0.46.</li>
-  </ul>
-  <p>All numbers on this page use the corrected record.</p>
-  <p class="caveat"><b>Demand characteristics.</b> Every system prompt began: <i id="aim"></i> It also told agents to "distinguish a proposed approach, a draft artifact, a tested artifact and externally validated completion" and to "preserve failures". The evidence-heavy vocabulary we observe (receipts, scopes, "not human adoption evidence") is at least partly an instruction-following effect.</p>
 </section>
 
-<section id="limits">
-  <h2>Limitations</h2>
-  <ul>
-    <li><b>One run, one model family.</b> Peer review here is the same model checking itself under a different prompt. There is no single-agent, assigned-team or no-judge control.</li>
-    <li><b>Replication vs. probe is a string match.</b> A command that differs only in flags counts as a new probe.</li>
-    <li><b>Observational feedback analysis.</b> Judges chose their wording per project, and the matched-time null controls for project lifetimes, not for project state.</li>
-    <li><b>The hypothesis was disclosed.</b> Agents knew the study was about completing projects through collaboration.</li>
-    <li><b>Keyword and topic measures are approximate.</b> Labels are assigned by published rules.</li>
-    <li><b>Selected cases.</b> The project paths illustrate how work was negotiated. They do not estimate how often assignments were accepted, and code authorship misses work done in separate entries or in chat.</li>
-    <li><b>Personas are not people.</b> Nothing here evaluates the real applicants or their proposals.</li>
-  </ul>
+<section id="artifacts">
+  <h2>What they made</h2>
+  <div class="evidence-grid">
+    <article class="case" id="civic-artifact">
+      <h3>A repair report with a check from the resident</h3>
+      <p>Four outcomes from the civic core’s saved simulation run at source version 4.</p>
+      <table class="compare artifact-table">
+        <thead><tr><th scope="col">What happened</th><th scope="col">State returned</th></tr></thead>
+        <tbody>
+          <tr><td>Steward marks the tap fixed</td><td>Claimed fixed</td></tr>
+          <tr><td>Reporter confirms the fix</td><td>Resolved</td></tr>
+          <tr><td>A different resident tries to confirm</td><td>Still claimed fixed</td></tr>
+          <tr><td>Reporter reopens the issue</td><td>Reopened</td></tr>
+        </tbody>
+      </table>
+    </article>
+    <article class="case" id="text-artifact">
+      <h3>A bilingual note kept as written</h3>
+      <p>One fixture in Tuhin’s adapter suite checks a note that switches from English to Hindi. The adapter preserves the text as entered.</p>
+      <blockquote class="artifact-quote">Inspect the inlet / <span lang="hi">इनलेट जाँचें</span></blockquote>
+      <p>The retained executions record 12 passing tests for the adapter and 16 for Anuj’s copy tests in the receiving project.</p>
+    </article>
+  </div>
 </section>
 
-<section id="next">
-  <h2>Future directions</h2>
-  <ul>
-    <li><b>Buy probes, not re-runs.</b> Require peer verifiers to submit a check that differs from the builder's, then measure confirmed defects per execution.</li>
-    <li><b>Make judges' feedback executable.</b> Randomise whether judges must phrase every review as an executable change request, and measure follow-through and acceptance.</li>
-    <li><b>Hide the hypothesis.</b> Run the same population with a neutral prompt and compare evidence vocabulary, review requests and collaboration rates.</li>
-    <li><b>Assign roles, or don't.</b> Compare self-organised specialisation with assigned builder/tester pairs at equal token budget.</li>
-    <li><b>Collaboration vs. solo work.</b> Match budgets across single-agent, assigned-team and self-organised conditions on the same project goals.</li>
-  </ul>
-</section>
-
-<section id="tests">
-  <h2>All hypothesis tests</h2>
-  <p>These tests were chosen after an initial qualitative review of the run. The table includes all exploratory tests, including null results. “Supported” marks results in the stated direction with a Benjamini–Hochberg-adjusted p-value below 0.05.</p>
-  <div id="tbl-tests"></div>
-</section>
-
-<section id="conversations">
-  <h2>Appendix: conversation excerpts</h2>
-  <p>We chose these conversations by rule, so they can be reproduced, and each card states its rule. Quoted turns are the first 60 words of the original message, with "…" where we cut. They complement the earlier audit's ten hand-picked highlights. Agents are simulated personas, and their words are not the views of the people they represent.</p>
-  <div class="convos" id="convos"></div>
-</section>
-
-<section id="agents">
-  <h2>Appendix: per-agent record</h2>
-  <p>Sortable. Messages are agent-written only. Spend is the API-equivalent estimate from the usage ledger.</p>
-  <div id="tbl-agents"></div>
-</section>
-
-<section id="related">
-  <h2>Related work</h2>
-  <ol class="refs">
-    <li>Hong et al. <a href="https://arxiv.org/abs/2308.00352v7">MetaGPT: Meta Programming for A Multi-Agent Collaborative Framework</a>. ICLR 2024.</li>
-    <li>Qian et al. <a href="https://aclanthology.org/2024.acl-long.810/">ChatDev: Communicative Agents for Software Development</a>. ACL 2024.</li>
-    <li>Xu et al. <a href="https://arxiv.org/abs/2412.14161v3">TheAgentCompany: Benchmarking LLM Agents on Consequential Real World Tasks</a>. 2024.</li>
-    <li>Cemri et al. <a href="https://arxiv.org/abs/2503.13657v3">Why Do Multi-Agent LLM Systems Fail?</a> 2025.</li>
-    <li>Kim et al. <a href="https://arxiv.org/abs/2512.08296v3">Towards a Science of Scaling Agent Systems</a>. 2025.</li>
-    <li>Paliskara, Namchittai and Lampinen. <a href="https://arxiv.org/abs/2610.00583v1">Worse Together: How Performance Breaks Down in Multi-User Multi-Agent Teams</a>. 2026.</li>
-    <li>Cheng et al. <a href="https://arxiv.org/abs/2611.15521v1">DecArena: Evaluating Large-Scale Decentralized Multi-Agent Collaboration</a>. 2026.</li>
-    <li>Park et al. <a href="https://arxiv.org/abs/2304.03442v2">Generative Agents: Interactive Simulacra of Human Behavior</a>. UIST 2023.</li>
-  </ol>
-</section>
-
-<section id="cite">
-  <h2>BibTeX</h2>
+<section id="appendix">
+  <h2>Appendix</h2>
+  <details class="appendix-item">
+    <summary>Sources and counting rules</summary>
+    <p>The catalogue combines the frozen project snapshot with the prior project overview and project-family review. Contribution counts are calculated directly from author IDs on source versions, run IDs, judge reviews and successful sharing and handoff calls. The roles beside each project come from the earlier qualitative review and can include contributions made in conversation or in another entry.</p>
+    <p>Written work without a workshop entry appears in the catalogue with its documented collaborators. The case studies and disagreement tally use selected exchanges. The tally describes the selected exchanges and has no run-wide denominator.</p>
+    <p>The snapshot also records 1,780 agent-written messages and 81 judge reviews. Message totals exclude 951 automated platform notices. One resident stopped receiving regular turns after three active hours. The prompt told agents to distinguish drafts, tested work and outside validation.</p>
+    <div class="buttons">
+      <a class="btn secondary" href="static/data/collaboration.json" download>Download catalogue and counts</a>
+      <a class="btn secondary" href="https://github.com/Deceptrax123/agent-project-study/blob/main/analysis/build_collaboration.py">Data-building script</a>
+    </div>
+  </details>
+  <details class="appendix-item" id="cite">
+    <summary>Cite this study</summary>
 <pre class="bibtex"><button class="theme-btn copy-btn" type="button">Copy</button><code>@misc{srinivasan2026zugramaresidency,
   title  = {Zugrama Residency},
   author = {Srinivasan, Srinitish},
   year   = {2026},
-  note   = {Zugrama studies, Study 2},
   url    = {https://deceptrax123.github.io/agent-project-study/}
 }</code></pre>
+  </details>
 </section>
 </div>
 </main>
 
 <footer>
   <div class="wrap">
-    <p><b>Data and privacy.</b> All figures and tests are computed from the frozen project snapshot, the run database (read-only), the raw request/response audit and the earlier audit's family classifications, using <code>analysis/build_data.py</code> and <code>analysis/science.py</code>. No resident code was executed. The page publishes aggregate statistics, first-name labels and short, rule-selected excerpts of agent-generated messages and reviews. It does not include source code, application forms, private memory or contact details.</p>
-    <p><b>Acknowledgements.</b> The selected project paths and family classifications build on earlier log analyses by GPT-6.1 Sol and GPT-6.2 Astra. Charts are rendered with D3.</p>
+    <p>The names refer to simulated agents. The public catalogue includes first-name labels, contribution summaries and selected synthetic test outcomes. It was produced without executing any resident code.</p>
   </div>
 </footer>
 <script src="static/js/charts.js"></script>
-<script src="static/js/main.js"></script>
+<script src="static/js/main.js?v=3"></script>
 </body>
 </html>

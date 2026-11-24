@@ -1,8 +1,7 @@
 """Build the project-team study's figure data from the frozen project snapshot.
 
 Reads (never writes) the parent workspace's frozen project-completion snapshot,
-the retrospective family classifications, the networking archive (for the
-cross-setting comparison) and the run database (usage only). Writes
+the retrospective family classifications and the run database (usage only). Writes
 static/data/projects.json. No resident code is executed.
 
 Usage:  python analysis/build_data.py [--labels names|codes]
@@ -25,7 +24,6 @@ SITE = Path(__file__).resolve().parents[1]
 WS = SITE.parents[1]
 SNAP = WS / "residency_app/experiments/project-completion/evaluations/final-snapshot.json"
 FAMILIES = WS / "sites/residency-findings/dist/data/final.json"
-ARCHIVE = WS / "sites/zugrama-residency-stories/dist/archive.json"
 DB = WS / "residency_app/.data/project-completion-private-run2/state/residency.sqlite3"
 OUT = SITE / "static/data/projects.json"
 
@@ -297,23 +295,6 @@ def main():
     except Exception as e:  # noqa: BLE001
         out["families_error"] = str(e)
 
-    # ---------- same personas, two settings ----------
-    A = json.loads(ARCHIVE.read_text())
-    R3 = next(r for r in A["runs"] if r["number"] == 3)
-    net_sent = collections.Counter(m["sender_id"] for m in R3["messages"])
-    key = lambda s: s.lower().replace("mosessampaul", "moses").split()[0]
-    alias = {"louisa": "lou"}
-    pmap = {key(v): k for k, v in names.items()}
-    cross = []
-    for p in A["people"]:
-        k = alias.get(key(p["name"]), key(p["name"]))
-        if k in pmap and pmap[k] in label:
-            cross.append({"agent": label[pmap[k]], "judge": pmap[k] in judge_ids,
-                          "networking": net_sent[p["id"]], "projects": msgs_by[pmap[k]]})
-    res = [c for c in cross if not c["judge"]]
-    rr = spearmanr([c["networking"] for c in res], [c["projects"] for c in res])
-    out["cross_setting"] = {"points": cross, "rho": r3(rr.correlation), "p": r3(rr.pvalue), "n": len(res)}
-
     out["agents"] = [{"agent": label[a], "role": "judge" if a in judge_ids else "resident",
                       "messages": msgs_by[a], "revisions": revc[a], "executions": runc[a],
                       "tool_calls": sum(per_agent[a].values()), "usd": round(cost_by.get(a, 0) / 1e6, 2)}
@@ -321,7 +302,7 @@ def main():
     OUT.write_text(json.dumps(out, ensure_ascii=False, separators=(",", ":")))
     print("wrote", OUT, OUT.stat().st_size)
     print(json.dumps({k: out[k] for k in ["overview", "verification", "revisions_by_non_owner"]}, indent=1))
-    print(out["judges"]["followed_by_revision"], out.get("families"), out["cross_setting"]["rho"], out["time_to_first_pass_min"]["median"])
+    print(out["judges"]["followed_by_revision"], out.get("families"), out["time_to_first_pass_min"]["median"])
 
 
 if __name__ == "__main__":

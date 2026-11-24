@@ -300,3 +300,39 @@ footer { border-top: 1px solid var(--border); margin-top: 40px; padding: 28px 0 
   .toc { columns: 1; }
   .turn { grid-template-columns: 1fr; gap: 2px; }
 }
+
+/* The study narrative and project explorer */
+.study-intro { padding-top: 6px; }
+.study-intro .lead { font-size: clamp(1.2rem, 2.6vw, 1.55rem); line-height: 1.5; }
+.study-counts { display: grid; grid-template-columns: repeat(3, 1fr); margin: 28px 0 0; border-block: 1px solid var(--border); }
+.study-counts div { padding: 14px 10px 14px 0; }
+.study-counts dt { color: var(--accent-ink); font-size: clamp(1.65rem, 5vw, 2.4rem); line-height: 1.1; font-weight: 650; }
+.study-counts dd { margin: 5px 0 0; font-size: .88rem; color: var(--ink-2); }
+.role-list { margin: 0 0 12px; }
+.role-list > div { display: grid; grid-template-columns: minmax(100px, 1fr) 3fr; gap: 4px 12px; padding: 6px 0; }
+.role-list dt { font-weight: 650; }
+.role-list dd { margin: 0; color: var(--ink-2); }
+.evidence-grid .role-list { font-size: .9rem; }
+.code-record > div { border-bottom: 1px solid var(--border); padding-block: 12px; }
+.project-explorer { border-top: 3px solid var(--s1); }
+.project-explorer > label { display: block; font-size: .9rem; font-weight: 650; margin-bottom: 6px; }
+.project-explorer select { max-width: 100%; width: 23rem; font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--axis); border-radius: 6px; padding: 7px 28px 7px 10px; }
+.project-explorer h3 { font-family: var(--serif); font-size: 1.65rem; margin-top: 18px; }
+.project-explorer h4 { margin: 16px 0 6px; }
+.project-purpose { margin-bottom: 4px; }
+.project-meta { color: var(--muted); font-size: .9rem; margin-bottom: 10px; }
+.project-entry, .appendix-item { border-top: 1px solid var(--border); padding: 9px 0; }
+.project-entry > summary, .appendix-item > summary { font-size: 1rem; font-weight: 600; }
+.project-entry > summary span { color: var(--muted); font-size: .85rem; font-weight: 400; margin-left: 6px; }
+.project-entry .table-wrap { margin: 10px 0; }
+.project-entry th, .project-entry td { font-size: .88rem; min-width: 65px; }
+.project-entry th[scope="row"] { white-space: nowrap; }
+.entry-history ol { padding-left: 24px; font-size: .9rem; }
+.artifact-table { margin-top: 10px; }
+.artifact-quote { margin: 12px 0; padding: 12px; background: var(--surface-2); border-left: 3px solid var(--s1); }
+.conflict-grid { align-items: stretch; }
+.appendix-item[open] > summary { margin-bottom: 10px; }
+@media (max-width: 420px) {
+  .case .role-list > div { grid-template-columns: 1fr; }
+  .code-record > div { grid-template-columns: 1fr; }
+}
